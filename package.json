@@ -1,0 +1,33 @@
+{
+  "name": "aidflow",
+  "version": "0.1.0",
+  "description": "Transparent, conditional aid disbursement on Stellar/Soroban",
+  "private": true,
+  "workspaces": [
+    "contracts/sdk",
+    "clients/*"
+  ],
+  "scripts": {
+    "lint": "echo 'Running lint checks...' && npm run lint --workspaces --if-present",
+    "test": "echo 'Running tests...' && npm run test --workspaces --if-present",
+    "build": "echo 'Building all packages...' && npm run build --workspaces --if-present"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stellar-impact/aidflow.git"
+  },
+  "keywords": [
+    "stellar",
+    "soroban",
+    "aid",
+    "blockchain",
+    "smart-contracts",
+    "drips-network"
+  ],
+  "author": "Stellar Impact",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}

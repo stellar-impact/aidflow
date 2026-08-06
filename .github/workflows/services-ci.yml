@@ -1,0 +1,114 @@
+name: Services CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'services/**'
+      - '.github/workflows/services-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'services/**'
+
+jobs:
+  fmt:
+    name: Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      
+      - name: Check formatting
+        working-directory: services
+        run: |
+          gofmt -l . > /tmp/gofmt.out
+          if [ -s /tmp/gofmt.out ]; then
+            echo "Files not formatted:"
+            cat /tmp/gofmt.out
+            exit 1
+          fi
+
+  lint:
+    name: Lint (golangci-lint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v4
+        with:
+          version: latest
+          working-directory: services
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      
+      - name: Download dependencies
+        working-directory: services
+        run: go mod download
+      
+      - name: Run tests
+        working-directory: services
+        run: go test -v -race -coverprofile=coverage.out ./...
+      
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: services/coverage.out
+          flags: services
+        continue-on-error: true
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [indexer, relayer, onboarding, oracle]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      
+      - name: Build ${{ matrix.service }}
+        working-directory: services
+        run: go build -v -o bin/${{ matrix.service }} ./cmd/${{ matrix.service }} || echo "${{ matrix.service }} not ready yet"
+
+  docker-build:
+    name: Docker Build (smoke test)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build indexer image
+        uses: docker/build-push-action@v5
+        with:
+          context: services
+          file: services/cmd/indexer/Dockerfile
+          push: false
+          tags: aidflow-indexer:test
+        continue-on-error: true

@@ -1,0 +1,71 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+out/
+target/
+*.wasm
+bin/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Rust
+# NOTE: Cargo.lock IS committed — these are deployable contract binaries,
+# so a pinned lockfile is required for reproducible/`--locked` builds.
+*.rs.bk
+**/*.rs.bk
+
+# Go
+# NOTE: go.sum is committed (module checksum integrity — never ignore it).
+
+# Testing
+coverage/
+*.test
+.nyc_output/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Docker
+.dockerignore
+
+# Stellar / Soroban
+.soroban/
+*.stellar
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Secrets
+*.pem
+*.key
+credentials.json

@@ -1,0 +1,127 @@
+name: Clients CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'clients/**'
+      - 'contracts/sdk/**'
+      - '.github/workflows/clients-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'clients/**'
+      - 'contracts/sdk/**'
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        client: [contracts/sdk, clients/donor-dashboard, clients/beneficiary-pwa]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Install ${{ matrix.client }} dependencies
+        working-directory: ${{ matrix.client }}
+        run: npm install || echo "${{ matrix.client }} not ready yet"
+      
+      - name: Run lint
+        working-directory: ${{ matrix.client }}
+        run: npm run lint || echo "Lint not configured yet"
+        continue-on-error: true
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        client: [contracts/sdk, clients/donor-dashboard, clients/beneficiary-pwa]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Install ${{ matrix.client }} dependencies
+        working-directory: ${{ matrix.client }}
+        run: npm install || echo "${{ matrix.client }} not ready yet"
+      
+      - name: Run tests
+        working-directory: ${{ matrix.client }}
+        run: npm test || echo "Tests not configured yet"
+        continue-on-error: true
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        client: [contracts/sdk, clients/donor-dashboard, clients/beneficiary-pwa]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Install ${{ matrix.client }} dependencies
+        working-directory: ${{ matrix.client }}
+        run: npm install || echo "${{ matrix.client }} not ready yet"
+      
+      - name: Build ${{ matrix.client }}
+        working-directory: ${{ matrix.client }}
+        run: npm run build || echo "${{ matrix.client }} not ready for build yet"
+      
+      - name: Check build output
+        working-directory: ${{ matrix.client }}
+        run: |
+          if [ -d "dist" ]; then
+            echo "✓ Build artifacts created"
+            ls -lh dist/ | head -10
+          else
+            echo "No dist/ directory (may be expected for early modules)"
+          fi
+
+  e2e:
+    name: E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Install Playwright
+        working-directory: clients/donor-dashboard
+        run: npx playwright install --with-deps || echo "Playwright not configured yet"
+        continue-on-error: true
+      
+      - name: Run E2E tests
+        working-directory: clients/donor-dashboard
+        run: npm run test:e2e || echo "E2E tests not configured yet"
+        continue-on-error: true

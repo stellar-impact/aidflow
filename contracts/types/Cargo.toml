@@ -1,0 +1,16 @@
+[package]
+name = "aidflow-contract-types"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+repository = "https://github.com/stellar-impact/aidflow"
+description = "Shared types for AidFlow Soroban contracts"
+
+[dependencies]
+soroban-sdk = { workspace = true }
+
+[lib]
+crate-type = ["lib"]
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }

@@ -1,0 +1,26 @@
+name: Boundary Check
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  check-boundaries:
+    name: Enforce Dependency Direction
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Make script executable
+        run: chmod +x ./scripts/check-boundaries.sh
+      
+      - name: Run boundary check
+        run: ./scripts/check-boundaries.sh
+      
+      - name: Report result
+        if: success()
+        run: echo "✓ Dependency boundaries OK"

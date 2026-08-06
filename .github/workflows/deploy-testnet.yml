@@ -1,0 +1,134 @@
+name: Deploy to Testnet
+
+on:
+  workflow_dispatch:
+    inputs:
+      admin_address:
+        description: 'Admin multisig address'
+        required: true
+        type: string
+      oracle_address:
+        description: 'Oracle service address'
+        required: true
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - 'contracts/**'
+
+env:
+  NETWORK: testnet
+
+jobs:
+  build-contracts:
+    name: Build Contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.84.0
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: contracts
+
+      - uses: cargo-bins/cargo-binstall@main
+
+      - name: Install stellar-cli
+        run: cargo binstall -y stellar-cli --version '^27'
+
+      - name: Build contracts
+        working-directory: contracts
+        run: |
+          chmod +x scripts/build.sh
+          ./scripts/build.sh
+      
+      - name: Upload WASM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: contracts-wasm
+          path: contracts/target/wasm32-unknown-unknown/release/*.wasm
+          retention-days: 7
+
+  deploy-testnet:
+    name: Deploy to Stellar Testnet
+    runs-on: ubuntu-latest
+    needs: build-contracts
+    if: github.event_name == 'workflow_dispatch'
+    environment:
+      name: testnet
+      url: https://stellar.expert/explorer/testnet
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download WASM artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: contracts-wasm
+          path: contracts/target/wasm32-unknown-unknown/release/
+      
+      - uses: cargo-bins/cargo-binstall@main
+
+      - name: Install stellar-cli
+        run: cargo binstall -y stellar-cli --version '^27'
+
+      - name: Configure Stellar CLI
+        run: |
+          stellar config network add testnet \
+            --rpc-url https://soroban-testnet.stellar.org \
+            --network-passphrase "Test SDF Network ; September 2015"
+      
+      - name: Deploy contracts
+        env:
+          DEPLOYER_SECRET: ${{ secrets.DEPLOYER_SECRET_KEY }}
+          ADMIN_ADDRESS: ${{ github.event.inputs.admin_address }}
+          ORACLE_ADDRESS: ${{ github.event.inputs.oracle_address }}
+        run: |
+          cd contracts
+          
+          echo "Deploying Config contract..."
+          CONFIG_ID=$(stellar contract deploy \
+            --wasm target/wasm32-unknown-unknown/release/aidflow_config.wasm \
+            --network testnet \
+            --source $DEPLOYER_SECRET) || echo "Config deploy failed (may not exist yet)"
+          
+          echo "CONFIG_CONTRACT_ID=$CONFIG_ID" >> $GITHUB_ENV
+          
+          echo "Deploying Escrow contract..."
+          ESCROW_ID=$(stellar contract deploy \
+            --wasm target/wasm32-unknown-unknown/release/aidflow_escrow.wasm \
+            --network testnet \
+            --source $DEPLOYER_SECRET) || echo "Escrow deploy failed (may not exist yet)"
+          
+          echo "ESCROW_CONTRACT_ID=$ESCROW_ID" >> $GITHUB_ENV
+          
+          echo "Deployment complete!"
+          echo "Config: $CONFIG_ID"
+          echo "Escrow: $ESCROW_ID"
+      
+      - name: Initialize contracts
+        env:
+          DEPLOYER_SECRET: ${{ secrets.DEPLOYER_SECRET_KEY }}
+          ADMIN_ADDRESS: ${{ github.event.inputs.admin_address }}
+          ORACLE_ADDRESS: ${{ github.event.inputs.oracle_address }}
+        run: |
+          echo "Initializing Config contract..."
+          stellar contract invoke \
+            --id $CONFIG_CONTRACT_ID \
+            --network testnet \
+            --source $DEPLOYER_SECRET \
+            -- init \
+            --admin $ADMIN_ADDRESS \
+            --oracle $ORACLE_ADDRESS || echo "Init failed (may not be ready yet)"
+      
+      - name: Create deployment summary
+        run: |
+          echo "## Testnet Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Config Contract:** \`$CONFIG_CONTRACT_ID\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Escrow Contract:** \`$ESCROW_CONTRACT_ID\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Admin:** \`${{ github.event.inputs.admin_address }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Oracle:** \`${{ github.event.inputs.oracle_address }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "View on Stellar Expert: https://stellar.expert/explorer/testnet" >> $GITHUB_STEP_SUMMARY

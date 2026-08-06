@@ -1,0 +1,119 @@
+name: PR CI Guard
+
+on:
+  workflow_run:
+    workflows: ["Contracts CI", "Services CI", "Clients CI", "Boundary Check"]
+    types:
+      - completed
+
+permissions:
+  pull-requests: write
+  issues: write
+
+jobs:
+  comment-on-failure:
+    name: Comment on Failed CI
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    
+    steps:
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Get the PR number from the workflow run
+            const run = context.payload.workflow_run;
+            let pr_number = run.pull_requests[0]?.number;
+
+            // Fallback for forked PRs (pull_requests array is empty)
+            if (!pr_number && run.head_repository?.fork) {
+              const { data: prs } = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                head: `${run.head_repository.owner.login}:${run.head_branch}`,
+                state: 'open'
+              });
+              pr_number = prs[0]?.number;
+            }
+
+            if (!pr_number) {
+              console.log('No PR associated with this workflow run');
+              return;
+            }
+
+            const workflow_name = run.name;
+            const workflow_url = run.html_url;
+            
+            // Comment body with verification reminder
+            const comment_body = `## ⚠️ CI Failure: ${workflow_name}
+
+The CI workflow "${workflow_name}" has failed. Please review the errors and fix them before re-requesting review.
+
+**[View workflow run →](${workflow_url})**
+
+### Common Issues
+
+If you're using an AI agent, please verify:
+
+1. **Version Pinning** (see \`docs/AIDFLOW_MASTER_PROMPT.md\` §0.5):
+   - Using \`stellar-cli\` 27.x (NOT \`soroban-cli\`)
+   - Using \`soroban-sdk\` 26.1+ for contracts
+   - Using \`github.com/stellar/go-stellar-sdk\` for Go (NOT deprecated \`github.com/stellar/go\`)
+
+2. **Build Commands**:
+   - Contracts: \`stellar contract build\` (NOT \`cargo build\`)
+   - Services: \`go build ./...\`
+   - Clients: \`npm run build\`
+
+3. **Verification Commands**:
+   - Run the issue's verification commands locally **before** pushing
+   - CI should mirror your local results
+
+### Next Steps
+
+1. Pull the latest CI logs from the workflow run above
+2. Run the same checks locally:
+   \`\`\`bash
+   make test
+   make lint
+   ./scripts/check-boundaries.sh
+   \`\`\`
+3. Fix the issues
+4. Force-push to your branch
+5. CI will automatically re-run
+
+---
+
+*This is an automated message. If you believe this is a false positive, please comment below.*`;
+            
+            // Check if we already commented on this PR
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr_number,
+            });
+            
+            const bot_comment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('CI Failure')
+            );
+            
+            if (bot_comment) {
+              // Update existing comment (idempotent)
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: bot_comment.id,
+                body: comment_body,
+              });
+              console.log('Updated existing CI failure comment');
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr_number,
+                body: comment_body,
+              });
+              console.log('Created new CI failure comment');
+            }
