@@ -2,9 +2,15 @@
 name: Drips Wave Contribution
 about: Template for Stellar Wave contribution issues
 title: '[Complexity] Feature/Task Title'
-labels: ['Stellar Wave', 'needs-triage']
+labels: []
 assignees: ''
 ---
+
+<!--
+  NOTE: The real `Stellar Wave` label is applied by maintainers only after the
+  repository is approved into a Drips Wave. Until then, put the complexity tier
+  in the title, e.g. "[High · 200] ...". Leave `labels` empty here.
+-->
 
 ## Description
 
