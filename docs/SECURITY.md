@@ -45,10 +45,10 @@ We take security seriously. If you discover a security vulnerability in AidFlow,
 
 | Component | Status | Auditor | Report | Date |
 |-----------|--------|---------|--------|------|
-| **Contracts** | Planned | TBD | TBD | Wave 7-8 (Q3 2026) |
-| **Services** | Planned | TBD | TBD | Wave 7-8 (Q3 2026) |
+| **Contracts** | Planned | TBD | TBD | Q3 2026 |
+| **Services** | Planned | TBD | TBD | Q3 2026 |
 
-**Pre-Audit Warning:** AidFlow is currently in MVP development (Waves 1-3). DO NOT use on mainnet with real funds until after professional security audit.
+**Pre-Audit Warning:** AidFlow is currently in MVP development. DO NOT use on mainnet with real funds until after professional security audit.
 
 ---
 
@@ -104,8 +104,8 @@ We take security seriously. If you discover a security vulnerability in AidFlow,
 
 ## Known Limitations (Pre-Audit)
 
-1. **Contract Upgrade Timelock:** Not yet implemented (planned for Wave 6)
-2. **Oracle Key Rotation:** Manual process (planned automation Wave 5)
+1. **Contract Upgrade Timelock:** Not yet implemented (planned for Beta)
+2. **Oracle Key Rotation:** Manual process (automation planned for Beta)
 3. **Rate Limiting:** Basic implementation (needs tuning)
 4. **PII Encryption:** Placeholder KMS integration (need full implementation)
 
@@ -144,7 +144,7 @@ After a vulnerability is fixed:
 1. **Coordinated Disclosure:** We notify affected users privately
 2. **Public Disclosure:** We publish details 30 days after fix is deployed
 3. **Credit:** We credit the reporter (unless they prefer anonymity)
-4. **Bug Bounty:** Planned for post-audit (Wave 8+)
+4. **Bug Bounty:** Planned for post-audit
 
 ---
 

@@ -47,7 +47,7 @@ kubectl apply -k k8s/overlays/mainnet
 
 ## Helm Charts
 
-*(Planned for Wave 6)*
+*(Planned — Beta)*
 
 Helm charts for easier deployment and configuration management.
 
@@ -59,7 +59,7 @@ helm install aidflow ./helm/aidflow --namespace aidflow
 
 All services expose Prometheus metrics on `/metrics`.
 
-**Grafana Dashboards:** (Planned for Wave 5)
+**Grafana Dashboards:** (Planned — Beta)
 - Contract events dashboard
 - Service health dashboard
 - Transaction volume dashboard

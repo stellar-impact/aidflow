@@ -5,7 +5,6 @@
 [![Contracts CI](https://github.com/stellar-impact/aidflow/actions/workflows/contracts-ci.yml/badge.svg?branch=main)](https://github.com/stellar-impact/aidflow/actions/workflows/contracts-ci.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Stellar](https://img.shields.io/badge/Stellar-Soroban-purple)](https://stellar.org)
-[![Drips Network](https://img.shields.io/badge/Drips-Stellar%20Wave-green)](https://www.drips.network/wave)
 
 > Aid that moves only when the work is verified — and stays auditable at every step.
 
@@ -267,18 +266,8 @@ before opening a pull request.
 > [AI Agent Guidelines](CONTRIBUTING.md#using-ai-agents-to-complete-issues) for the
 > version-pinning and verification requirements that keep CI green.
 
-### Contributing via Drips Stellar Wave
-
-AidFlow participates in the [Drips Network Stellar Wave](https://www.drips.network/wave).
-Issues labeled **`Stellar Wave`** are open for contribution and tagged by complexity:
-
-| Tier | Points | Scope |
-|------|--------|-------|
-| Trivial | 100 | Small, well-scoped fixes |
-| Medium | 150 | Focused features or tests |
-| High | 200 | Fund-custodying contracts and core logic |
-
-Browse [open issues](https://github.com/stellar-impact/aidflow/issues) to get started.
+Browse the [open issues](https://github.com/stellar-impact/aidflow/issues) to find
+something to work on — each is tagged by complexity in its title.
 
 ---
 
@@ -354,7 +343,6 @@ language governing permissions and limitations.
 ## Links
 
 - **Repository:** <https://github.com/stellar-impact/aidflow>
-- **Drips Stellar Wave:** <https://www.drips.network/wave>
 - **Stellar Developers:** <https://developers.stellar.org>
 - **Soroban Docs:** <https://developers.stellar.org/docs/build/smart-contracts>
 

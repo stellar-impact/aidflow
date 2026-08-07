@@ -6,7 +6,7 @@ Services are `@internal` and tightly coupled to AidFlow's specific use case. The
 
 ## Exception: Indexer
 
-If 3+ external integrators request standalone indexer, may extract in Wave 10+:
+If 3+ external integrators request standalone indexer, may extract in a later phase:
 - Target: `stellar-impact/aidflow-indexer`
 - Publish: `@aidflow/indexer-client` (npm)
 - Status: `@beta` (interface may change)

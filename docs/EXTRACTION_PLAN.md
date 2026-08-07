@@ -1,7 +1,7 @@
 # AidFlow Extraction Plan
 
 **Status:** Roadmap  
-**Target:** Wave 7-8 (Post-Audit)
+**Target:** Post-Audit
 
 ---
 
@@ -13,7 +13,7 @@ AidFlow starts as a monorepo for rapid development but is designed for contract 
 
 ### Why Monorepo Now?
 
-- Fast iteration during MVP (Waves 1-3)
+- Fast iteration during MVP
 - Easy cross-module refactoring
 - Single CI/CD pipeline
 - Simplified local development setup
@@ -28,7 +28,7 @@ AidFlow starts as a monorepo for rapid development but is designed for contract 
 
 ## Extraction Phases
 
-### Phase 1: Contracts Extraction (Wave 7-8, Post-Audit)
+### Phase 1: Contracts Extraction (Post-Audit)
 
 **Target Repository:** `stellar-impact/aidflow-contracts`
 
@@ -76,11 +76,11 @@ contracts/
    - No relative imports into removed `contracts/` directory
    - All references via published packages only
 
-**Timeline:** 2-3 weeks post-audit (Wave 7-8)
+**Timeline:** 2-3 weeks post-audit
 
 ---
 
-### Phase 2: Indexer Extraction (Wave 10+, Optional)
+### Phase 2: Indexer Extraction (Optional)
 
 **Target Repository:** `stellar-impact/aidflow-indexer`
 
@@ -155,7 +155,7 @@ Follows contract versioning (1:1 mapping).
 
 ## Communication Plan
 
-1. **Announcement:** GitHub discussion + blog post (Wave 7)
+1. **Announcement:** GitHub discussion + blog post
 2. **Migration Guide:** Step-by-step instructions for integrators
 3. **Deprecation Period:** 6 months support for old monorepo references
 4. **Office Hours:** Weekly Q&A for integrators during migration

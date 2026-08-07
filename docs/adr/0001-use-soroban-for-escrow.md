@@ -112,7 +112,7 @@ We will use **Stellar Soroban smart contracts** for all escrow, voucher, and mer
 
 ### Mitigations
 
-- **Audit:** Hire auditor with Rust+WASM experience (Wave 7-8)
+- **Audit:** Hire auditor with Rust+WASM experience (pre-mainnet)
 - **Testnet First:** Extensive testing before mainnet (1+ month)
 - **Circuit Breaker:** Admin pause function for emergencies
 - **Gradual Rollout:** Start with small pilot programs

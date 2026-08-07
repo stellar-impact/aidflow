@@ -1,6 +1,6 @@
 # Mainnet Overlay
 
-**Status:** Deferred until post-audit (Wave 7-8)
+**Status:** Deferred until post-audit
 
 This directory will contain Kustomize patches for mainnet deployment once contracts are audited and testnet deployment is validated.
 

@@ -12,7 +12,7 @@ AidFlow consists of multiple components: Soroban contracts (Rust), backend servi
 
 ### Requirements
 
-1. **Fast Iteration:** Enable rapid development during MVP (Waves 1-3)
+1. **Fast Iteration:** Enable rapid development during MVP
 2. **Easy Refactoring:** Allow cross-component changes without PRs across repos
 3. **Contract Stability:** Eventually publish contracts as standalone package
 4. **Independent Versioning:** Contracts vs services may evolve at different rates
@@ -23,7 +23,7 @@ AidFlow consists of multiple components: Soroban contracts (Rust), backend servi
 
 ## Decision
 
-We will use a **monorepo during MVP development** with a **planned extraction of contracts** into a standalone repository after audit (Wave 7-8).
+We will use a **monorepo during MVP development** with a **planned extraction of contracts** into a standalone repository after audit.
 
 ---
 
@@ -104,7 +104,7 @@ We will use a **monorepo during MVP development** with a **planned extraction of
 
 ```
 aidflow/
-├── contracts/       # EXTRACTABLE → aidflow-contracts (Wave 7-8)
+├── contracts/       # EXTRACTABLE → aidflow-contracts (post-audit)
 │   ├── types/      # @stable after audit
 │   ├── config/     # @stable after audit
 │   ├── escrow/     # @stable after audit
@@ -120,12 +120,12 @@ aidflow/
 
 ### Extraction Timeline
 
-| Phase | Timeline | Action |
-|-------|----------|--------|
-| **Now (Waves 1-3)** | MVP | Develop in monorepo |
-| **Wave 4-6** | Beta | Stabilize contract interfaces |
-| **Wave 7-8** | Audit | Extract contracts → `aidflow-contracts` repo |
-| **Wave 9+** | Mainnet | Monorepo depends on published contracts |
+| Phase | Action |
+|-------|--------|
+| **MVP** | Develop in monorepo |
+| **Beta** | Stabilize contract interfaces |
+| **Audit** | Extract contracts → `aidflow-contracts` repo |
+| **Mainnet** | Monorepo depends on published contracts |
 
 ### Boundary Enforcement
 
@@ -141,7 +141,7 @@ clients/    →  depends on published @aidflow/contract-sdk
 - Fails if services/clients use relative paths into contracts/
 - Services/clients MUST depend on published packages
 
-### Extraction Process (Wave 7-8)
+### Extraction Process (Audit phase)
 
 1. **Freeze Contract Interfaces:**
    - Mark all public APIs `@stable`
@@ -186,8 +186,8 @@ clients/    →  depends on published @aidflow/contract-sdk
 
 - **Stability Markers:** Tag APIs with `@stable` or `@beta` from day 1
 - **Boundary Checks:** CI enforces dependency direction immediately
-- **Extraction Dry-Run:** Test extraction process early (Wave 6)
-- **Migration Guide:** Write guide before extraction (Wave 7)
+- **Extraction Dry-Run:** Test extraction process early (Beta)
+- **Migration Guide:** Write guide before extraction (Audit phase)
 
 ---
 
@@ -195,9 +195,9 @@ clients/    →  depends on published @aidflow/contract-sdk
 
 This decision will be validated by:
 
-1. **Developer Velocity:** MVP developed in <8 weeks (Waves 1-3)
+1. **Developer Velocity:** MVP developed in <8 weeks
 2. **Boundary Checks Pass:** CI green on every PR
-3. **Successful Extraction:** Dry-run extraction in Wave 6 works
+3. **Successful Extraction:** Dry-run extraction in the Beta phase works
 4. **External Integration:** Post-extraction, external team can integrate contracts
 
 If extraction proves too complex, we may keep monorepo but publish contracts from subdirectory (submodule pattern).
@@ -214,7 +214,7 @@ If extraction proves too complex, we may keep monorepo but publish contracts fro
 
 ## Future Considerations
 
-**Potential Phase 2 Extraction (Wave 10+):**
+**Potential Phase 2 Extraction (later):**
 - If indexer sees external demand, extract it too
 - Otherwise keep in monorepo (internal-only service)
 

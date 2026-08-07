@@ -1,8 +1,7 @@
 # AidFlow — Master Scaffolding Prompt (Spec-Driven Agent)
 
 > **Status:** Stack LOCKED. This is the canonical prompt to hand to a spec-driven
-> agent (or to execute directly) to scaffold AidFlow and generate Drips Wave issues.
-> Target: **Drips Network — Stellar Wave**.
+> agent (or to execute directly) to scaffold AidFlow and generate contribution issues.
 
 ---
 
@@ -123,8 +122,8 @@ clients/    →  depends on @aidflow/contract-sdk (published), services (HTTP/Gr
 - `@internal` — monorepo-only; never published.
 
 ### Extraction roadmap (`docs/EXTRACTION_PLAN.md`)
-1. **Phase 1 (Wave 7–8, post-audit):** extract `contracts/` → `aidflow-contracts` via `git filter-repo`; publish v1.0.0 packages; monorepo consumes registry versions.
-2. **Phase 2 (Wave 10+, optional):** extract `services/indexer/` → `aidflow-indexer` if external demand.
+1. **Phase 1 (post-audit):** extract `contracts/` → `aidflow-contracts` via `git filter-repo`; publish v1.0.0 packages; monorepo consumes registry versions.
+2. **Phase 2 (optional):** extract `services/indexer/` → `aidflow-indexer` if external demand.
 3. **Phase 3:** no further splits — clients + remaining services stay coupled.
 
 ### Boundary enforcement
@@ -145,7 +144,7 @@ aidflow/
 │   │   ├── services-ci.yml           # go fmt, golangci-lint, go test, docker build
 │   │   ├── clients-ci.yml            # lint, test, build; Playwright E2E on main
 │   │   └── deploy-testnet.yml        # deploy + init contracts on testnet
-│   └── ISSUE_TEMPLATE/ { bug_report, feature_request, drips_wave_contribution }.md
+│   └── ISSUE_TEMPLATE/ { bug_report, feature_request, contribution }.md
 ├── contracts/                        # EXTRACTABLE → aidflow-contracts
 │   ├── EXTRACTION.md · Cargo.toml
 │   ├── types/  (aidflow-contract-types crate, @stable)
@@ -206,13 +205,13 @@ fn is_active(env, merchant) -> bool;
 
 ---
 
-## 6. Drips Wave Issue Format
+## 6. Contribution Issue Format
 
 ```markdown
-labels: ["Stellar Wave", "<Trivial (100pt)|Medium (150pt)|High (200pt)>", "<area>", "<Pn>"]
+labels: ["<Trivial|Medium|High>", "<area>", "<Pn>"]
 
 ## [<Complexity>] <Title>
-**Points:** <100|150|200>
+**Complexity:** <Trivial|Medium|High>
 ### Description
 <2–3 sentences: what and why>
 ### Acceptance Criteria
@@ -232,16 +231,16 @@ Run locally before opening a PR:
 
 Every generated issue body MUST include this Verification block (tailored to its area).
 
-**Labels:** complexity · area {contracts,services,clients,infra,docs,security,testing,extraction} · `Stellar Wave` · priority {P0,P1,P2} · `good first issue`.
-**Milestones:** MVP (Wave 1–3) · Beta (Wave 4–6) · Audit Prep (Wave 7–8).
+**Labels:** complexity · area {contracts,services,clients,infra,docs,security,testing,extraction} · priority {P0,P1,P2} · `good first issue`.
+**Milestones:** MVP · Beta · Audit Prep.
 
 ### Issue backlog (generate full bodies for each)
 
-**Trivial (100pt)** — architecture diagram; SEP-24 flow doc; Escrow doc comments + `@stable` markers; indexer healthcheck; ESLint/Prettier; voucher-expiry unit test; issue templates; `.env.example`; license headers; CSV import template; write `EXTRACTION_PLAN.md`; `@stable` markers on contract types.
+**Trivial** — architecture diagram; SEP-24 flow doc; Escrow doc comments + `@stable` markers; indexer healthcheck; ESLint/Prettier; voucher-expiry unit test; issue templates; `.env.example`; license headers; CSV import template; write `EXTRACTION_PLAN.md`; `@stable` markers on contract types.
 
-**Medium (150pt)** — `Escrow.create_program`; onboarding CSV endpoint; indexer Horizon SSE; passkey wallet in PWA; merchant QR scanner; relayer fee-bump; `VoucherRegistry.issue_batch`; donor funding UI; beneficiary Postgres migration; milestone-release integration test; PII envelope encryption; oracle Prometheus metrics; PWA balance display; upgrade timelock; merchant allowlist; publish `aidflow-contract-types`; TS SDK `@aidflow/contract-sdk`; npm workspaces setup; `check-boundaries.sh`.
+**Medium** — `Escrow.create_program`; onboarding CSV endpoint; indexer Horizon SSE; passkey wallet in PWA; merchant QR scanner; relayer fee-bump; `VoucherRegistry.issue_batch`; donor funding UI; beneficiary Postgres migration; milestone-release integration test; PII envelope encryption; oracle Prometheus metrics; PWA balance display; upgrade timelock; merchant allowlist; publish `aidflow-contract-types`; TS SDK `@aidflow/contract-sdk`; npm workspaces setup; `check-boundaries.sh`.
 
-**High (200pt)** — full oracle bridge; E2E SEP-24 cash-out; Playwright E2E suite; storage-migration on upgrade; donor audit timeline (GraphQL→React); multisig admin module; batch-issuance gas optimization; security audit checklist + cargo-fuzz; merchant analytics; sealed-secrets K8s; GraphQL subscriptions; voucher batch-expiry cron; SMS notifications (Twilio); relayer chaos tests; privacy-preserving analytics; contracts extraction dry-run (`git filter-repo`); extraction migration guide.
+**High** — full oracle bridge; E2E SEP-24 cash-out; Playwright E2E suite; storage-migration on upgrade; donor audit timeline (GraphQL→React); multisig admin module; batch-issuance gas optimization; security audit checklist + cargo-fuzz; merchant analytics; sealed-secrets K8s; GraphQL subscriptions; voucher batch-expiry cron; SMS notifications (Twilio); relayer chaos tests; privacy-preserving analytics; contracts extraction dry-run (`git filter-repo`); extraction migration guide.
 
 ---
 
@@ -291,7 +290,7 @@ jobs:
             // an existing bot comment rather than spamming new ones.
 ```
 
-**`.github/ISSUE_TEMPLATE/drips_wave_contribution.md`** must embed the same Verification block + pinned-version reminder from §6.
+**`.github/ISSUE_TEMPLATE/contribution.md`** must embed the same Verification block + pinned-version reminder from §6.
 
 
 ## 8. Success Criteria
@@ -313,7 +312,7 @@ Build ONE module at a time, in this order. After each, verify it builds/tests an
 | 6 | Services: indexer + relayer (Go, new SDK path) | `go build ./...` · `go test ./...` | compiles |
 | 7 | Services: onboarding + oracle | `go build ./...` · `go test ./...` | compiles |
 | 8 | Clients (donor dashboard, PWA, merchant) — use `npm create vite@latest` / `create-expo-app`, don't hardcode versions | `npm run build` each | builds |
-| 9 | Drips issue backlog (~48 full bodies) + `docker-compose up` smoke | manual review · compose up | stack runs |
+| 9 | Issue backlog (~48 full bodies) + `docker-compose up` smoke | manual review · compose up | stack runs |
 
 **Rules for the agent:**
 1. Report build status after EVERY module. Stop and flag on failure — do not "work around" a compile error by inventing APIs.

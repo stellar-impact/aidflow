@@ -1,15 +1,14 @@
 ---
-name: Drips Wave Contribution
-about: Template for Stellar Wave contribution issues
+name: Contribution
+about: Template for scoped contribution issues
 title: '[Complexity] Feature/Task Title'
 labels: []
 assignees: ''
 ---
 
 <!--
-  NOTE: The real `Stellar Wave` label is applied by maintainers only after the
-  repository is approved into a Drips Wave. Until then, put the complexity tier
-  in the title, e.g. "[High · 200] ...". Leave `labels` empty here.
+  NOTE: Put the complexity tier in the title, e.g. "[High] ..." or
+  "[Trivial] ...", so contributors can gauge scope at a glance.
 -->
 
 ## Description
@@ -83,6 +82,6 @@ npm test
 
 ---
 
-**Points:** <!-- 100 | 150 | 200 -->  
+**Complexity:** <!-- Trivial | Medium | High -->  
 **Area:** <!-- contracts | services | clients | infra | docs -->  
 **Priority:** <!-- P0 | P1 | P2 -->

@@ -1,6 +1,6 @@
 # Contracts Extraction
 
-**Target:** `stellar-impact/aidflow-contracts` (Wave 7-8)
+**Target:** `stellar-impact/aidflow-contracts` (post-audit)
 
 This directory will be extracted into a standalone repository after audit.
 
