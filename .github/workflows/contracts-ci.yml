@@ -72,9 +72,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@1.95.0
+        with:
+          targets: wasm32v1-none
 
       - uses: Swatinem/rust-cache@v2
         with:
@@ -84,7 +86,7 @@ jobs:
 
       - name: Install stellar-cli
         run: cargo binstall -y stellar-cli --version '^27'
-      
+
       - name: Build contracts
         working-directory: contracts
         run: |
