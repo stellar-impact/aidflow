@@ -10,12 +10,12 @@ echo ""
 echo "Building aidflow-config..."
 stellar contract build --package aidflow-config
 
-# Add more packages as they're created
-# echo "Building aidflow-escrow..."
-# stellar contract build --package aidflow-escrow
+# Build escrow contract
+echo "Building aidflow-escrow..."
+stellar contract build --package aidflow-escrow
 
 echo ""
 echo "✅ Contracts built successfully!"
 echo ""
 echo "WASM outputs:"
-ls -lh target/wasm32-unknown-unknown/release/*.wasm 2>/dev/null || echo "  (No WASM files yet)"
+ls -lh target/wasm32v1-none/release/*.wasm 2>/dev/null || echo "  (No WASM files yet)"

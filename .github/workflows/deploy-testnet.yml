@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@1.84.0
+        uses: dtolnay/rust-toolchain@1.95.0
 
       - uses: Swatinem/rust-cache@v2
         with:
@@ -48,7 +48,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: contracts-wasm
-          path: contracts/target/wasm32-unknown-unknown/release/*.wasm
+          path: contracts/target/wasm32v1-none/release/*.wasm
           retention-days: 7
 
   deploy-testnet:
@@ -66,7 +66,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: contracts-wasm
-          path: contracts/target/wasm32-unknown-unknown/release/
+          path: contracts/target/wasm32v1-none/release/
       
       - uses: cargo-bins/cargo-binstall@main
 
@@ -89,15 +89,15 @@ jobs:
           
           echo "Deploying Config contract..."
           CONFIG_ID=$(stellar contract deploy \
-            --wasm target/wasm32-unknown-unknown/release/aidflow_config.wasm \
+            --wasm target/wasm32v1-none/release/aidflow_config.wasm \
             --network testnet \
             --source $DEPLOYER_SECRET) || echo "Config deploy failed (may not exist yet)"
-          
+
           echo "CONFIG_CONTRACT_ID=$CONFIG_ID" >> $GITHUB_ENV
-          
+
           echo "Deploying Escrow contract..."
           ESCROW_ID=$(stellar contract deploy \
-            --wasm target/wasm32-unknown-unknown/release/aidflow_escrow.wasm \
+            --wasm target/wasm32v1-none/release/aidflow_escrow.wasm \
             --network testnet \
             --source $DEPLOYER_SECRET) || echo "Escrow deploy failed (may not exist yet)"
           

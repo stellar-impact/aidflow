@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@1.84.0
+        uses: dtolnay/rust-toolchain@1.95.0
         with:
           components: rustfmt
 
@@ -38,7 +38,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@1.84.0
+        uses: dtolnay/rust-toolchain@1.95.0
         with:
           components: clippy
 
@@ -57,7 +57,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@1.84.0
+        uses: dtolnay/rust-toolchain@1.95.0
 
       - uses: Swatinem/rust-cache@v2
         with:
@@ -74,7 +74,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@1.84.0
+        uses: dtolnay/rust-toolchain@1.95.0
 
       - uses: Swatinem/rust-cache@v2
         with:
@@ -93,7 +93,7 @@ jobs:
       
       - name: Verify WASM outputs
         run: |
-          ls -lh contracts/target/wasm32-unknown-unknown/release/*.wasm || echo "No WASM files yet (expected for early modules)"
+          ls -lh contracts/target/wasm32v1-none/release/*.wasm || echo "No WASM files yet (expected for early modules)"
 
   audit:
     name: Security Audit
@@ -102,7 +102,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@1.84.0
+        uses: dtolnay/rust-toolchain@1.95.0
 
       - uses: Swatinem/rust-cache@v2
         with:
