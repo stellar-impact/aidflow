@@ -179,6 +179,19 @@ cargo test --all
 # → target/wasm32v1-none/release/aidflow_escrow.wasm
 ```
 
+### Testnet Deployment
+
+Config and Escrow are live on Stellar testnet (deployed with `contracts/scripts/deploy-testnet.sh`):
+
+| Contract | ID |
+|----------|----|
+| Config | [`CATFQMMNYS3W7GZHHJWLXXQOITXTMD33C42XDYCIHCEZ5A4FQKT3N42V`](https://stellar.expert/explorer/testnet/contract/CATFQMMNYS3W7GZHHJWLXXQOITXTMD33C42XDYCIHCEZ5A4FQKT3N42V) |
+| Escrow | [`CDXHAOXO3GBH7WTNYHUMC5BKIFSELZ7QVNAFS5K57XWXJ2PC7C5CTKHX`](https://stellar.expert/explorer/testnet/contract/CDXHAOXO3GBH7WTNYHUMC5BKIFSELZ7QVNAFS5K57XWXJ2PC7C5CTKHX) |
+
+Testnet-only caveats: the settlement token is the native XLM asset contract (not USDC), and
+Escrow's `voucher_registry` is a placeholder address until `VoucherRegistry` is built, so
+`release()` is not meaningful yet. Admin and oracle keys are throwaway testnet identities.
+
 ### Full Workspace
 
 From the repository root:
