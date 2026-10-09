@@ -1,8 +1,4 @@
 #![no_std]
-// AGENT-FLAG: The events API using env.events().publish() is deprecated in soroban-sdk 26.1
-// The recommended approach is to use #[contractevent] macro on event types
-// This should be updated to use the new event API pattern
-#![allow(deprecated)]
 
 //! AidFlow Config / AccessControl Contract
 //!
@@ -11,7 +7,7 @@
 //!
 //! @stable
 
-use soroban_sdk::{contract, contractimpl, contracttype, symbol_short, Address, Env};
+use soroban_sdk::{contract, contractevent, contractimpl, contracttype, Address, Env};
 
 /// Instance storage TTL: bump when within ~23 days of expiry, extend to ~30 days.
 /// Ledgers are ~5s apart: 30 days ≈ 518_400 ledgers, 23 days ≈ 397_440 ledgers.
@@ -26,6 +22,28 @@ pub enum DataKey {
     Oracle,
     Paused,
 }
+
+/// Event emitted when admin address is updated
+#[contractevent]
+pub struct AdminUpdated {
+    pub old_admin: Address,
+    pub new_admin: Address,
+}
+
+/// Event emitted when oracle address is updated
+#[contractevent]
+pub struct OracleUpdated {
+    pub old_oracle: Address,
+    pub new_oracle: Address,
+}
+
+/// Event emitted when contracts are paused
+#[contractevent]
+pub struct Paused {}
+
+/// Event emitted when contracts are unpaused
+#[contractevent]
+pub struct Unpaused {}
 
 /// Extend the instance storage TTL so admin/oracle/paused never archive
 /// on an infrequently-called config contract.
@@ -85,8 +103,11 @@ impl ConfigContract {
         bump_instance_ttl(&env);
 
         // Emit event
-        env.events()
-            .publish((symbol_short!("admin_upd"),), (admin, new_admin));
+        AdminUpdated {
+            old_admin: admin,
+            new_admin,
+        }
+        .publish(&env);
     }
 
     /// Update the oracle address.
@@ -116,8 +137,11 @@ impl ConfigContract {
         bump_instance_ttl(&env);
 
         // Emit event
-        env.events()
-            .publish((symbol_short!("orac_upd"),), (old_oracle, new_oracle));
+        OracleUpdated {
+            old_oracle,
+            new_oracle,
+        }
+        .publish(&env);
     }
 
     /// Pause all contract operations (circuit breaker).
@@ -140,7 +164,7 @@ impl ConfigContract {
         bump_instance_ttl(&env);
 
         // Emit event
-        env.events().publish((symbol_short!("paused"),), ());
+        Paused {}.publish(&env);
     }
 
     /// Resume contract operations.
@@ -163,7 +187,7 @@ impl ConfigContract {
         bump_instance_ttl(&env);
 
         // Emit event
-        env.events().publish((symbol_short!("unpaused"),), ());
+        Unpaused {}.publish(&env);
     }
 
     /// Check if contracts are paused.

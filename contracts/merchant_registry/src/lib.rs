@@ -1,8 +1,4 @@
 #![no_std]
-// AGENT-FLAG: events use env.events().publish() (deprecated in soroban-sdk 26.1).
-// Kept consistent with the other contracts; migrate all contracts to the
-// #[contractevent] macro together in a dedicated events pass.
-#![allow(deprecated)]
 
 //! AidFlow MerchantRegistry Contract
 //!
@@ -23,7 +19,9 @@
 //! @stable
 
 use aidflow_contract_types::{Merchant, CATEGORY_FOOD, CATEGORY_OTHER};
-use soroban_sdk::{contract, contractimpl, contracttype, token, Address, Env, Symbol, Vec};
+use soroban_sdk::{
+    contract, contractevent, contractimpl, contracttype, token, Address, Env, Symbol, Vec,
+};
 
 /// Instance-storage TTL bounds (ledgers, ~5s each): bump at ~23 days, extend to ~30.
 const TTL_THRESHOLD: u32 = 397_440;
@@ -42,6 +40,27 @@ pub enum DataKey {
     Token,
     /// Merchant record by address (persistent)
     Merchant(Address),
+}
+
+/// Event emitted when a merchant is registered
+#[contractevent]
+pub struct MerchantRegistered {
+    pub merchant: Address,
+    pub category: u32,
+}
+
+/// Event emitted when a voucher is redeemed
+#[contractevent]
+pub struct VoucherRedeemed {
+    pub from: Address,
+    pub merchant: Address,
+    pub amount: i128,
+}
+
+/// Event emitted when a merchant is deactivated
+#[contractevent]
+pub struct MerchantDeactivated {
+    pub merchant: Address,
 }
 
 #[contract]
@@ -94,10 +113,7 @@ impl MerchantRegistryContract {
         );
         bump_instance_ttl(&env);
 
-        env.events().publish(
-            (Symbol::new(&env, "merchant_registered"),),
-            (merchant, category),
-        );
+        MerchantRegistered { merchant, category }.publish(&env);
     }
 
     /// Deactivate a merchant. Requires admin auth. Allowed while paused.
@@ -114,8 +130,7 @@ impl MerchantRegistryContract {
         save_merchant(&env, &record);
         bump_instance_ttl(&env);
 
-        env.events()
-            .publish((Symbol::new(&env, "merchant_deactivated"),), merchant);
+        MerchantDeactivated { merchant }.publish(&env);
     }
 
     /// Redeem `amount` from a beneficiary to an active merchant's payout
@@ -139,10 +154,12 @@ impl MerchantRegistryContract {
         token::TokenClient::new(&env, &token).transfer(&from, &record.payout, &amount);
         bump_instance_ttl(&env);
 
-        env.events().publish(
-            (Symbol::new(&env, "voucher_redeemed"),),
-            (from, merchant, amount),
-        );
+        VoucherRedeemed {
+            from,
+            merchant,
+            amount,
+        }
+        .publish(&env);
     }
 
     /// Whether the merchant is registered and active. False if unknown.

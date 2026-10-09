@@ -1,8 +1,4 @@
 #![no_std]
-// AGENT-FLAG: events use env.events().publish() (deprecated in soroban-sdk 26.1).
-// Kept consistent with the config and escrow contracts; migrate all contracts to
-// the #[contractevent] macro together in a dedicated events pass.
-#![allow(deprecated)]
 
 //! AidFlow VoucherRegistry Contract
 //!
@@ -26,7 +22,8 @@
 
 use aidflow_contract_types::{Voucher, VoucherStatus};
 use soroban_sdk::{
-    contract, contractimpl, contracttype, token, vec, Address, Env, IntoVal, Symbol, Vec,
+    contract, contractevent, contractimpl, contracttype, token, vec, Address, Env, IntoVal, Symbol,
+    Vec,
 };
 
 /// Instance-storage TTL bounds (ledgers, ~5s each): bump at ~23 days, extend to ~30.
@@ -57,6 +54,30 @@ pub enum DataKey {
     Outstanding,
     /// Voucher record by id (persistent)
     Voucher(u64),
+}
+
+/// Event emitted when a voucher is issued
+#[contractevent]
+pub struct VoucherIssued {
+    pub voucher_id: u64,
+    pub program_id: u64,
+    pub recipient: Address,
+    pub amount: i128,
+}
+
+/// Event emitted when a voucher is claimed
+#[contractevent]
+pub struct VoucherClaimed {
+    pub voucher_id: u64,
+    pub recipient: Address,
+    pub amount: i128,
+}
+
+/// Event emitted when a voucher expires
+#[contractevent]
+pub struct VoucherExpired {
+    pub voucher_id: u64,
+    pub amount: i128,
 }
 
 #[contract]
@@ -154,10 +175,13 @@ impl VoucherRegistryContract {
             };
             save_voucher(&env, &voucher);
             ids.push_back(counter);
-            env.events().publish(
-                (Symbol::new(&env, "voucher_issued"),),
-                (counter, program_id, recipient, amount),
-            );
+            VoucherIssued {
+                voucher_id: counter,
+                program_id,
+                recipient,
+                amount,
+            }
+            .publish(&env);
         }
 
         env.storage()
@@ -197,10 +221,12 @@ impl VoucherRegistryContract {
         let here = env.current_contract_address();
         token_client(&env).transfer(&here, &voucher.recipient, &voucher.amount);
 
-        env.events().publish(
-            (Symbol::new(&env, "voucher_claimed"),),
-            (voucher_id, voucher.recipient, voucher.amount),
-        );
+        VoucherClaimed {
+            voucher_id,
+            recipient: voucher.recipient,
+            amount: voucher.amount,
+        }
+        .publish(&env);
     }
 
     /// Expire an unclaimed voucher once `now > expiry` and return its funds to
@@ -237,10 +263,11 @@ impl VoucherRegistryContract {
             ],
         );
 
-        env.events().publish(
-            (Symbol::new(&env, "voucher_expired"),),
-            (voucher_id, voucher.amount),
-        );
+        VoucherExpired {
+            voucher_id,
+            amount: voucher.amount,
+        }
+        .publish(&env);
     }
 
     /// Get a voucher's details.
