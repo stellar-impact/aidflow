@@ -58,6 +58,16 @@ make install
 make test
 ```
 
+### Verify your setup
+
+Before picking up an issue, confirm the Rust/Soroban toolchain alone can exercise the contracts (no Node, Go, or Docker required for this check):
+
+```bash
+cd contracts && cargo test --all
+```
+
+That suite should report **37** passing tests. You also need the `wasm32v1-none` target and **stellar-cli** 27.x, matching the [README prerequisites](./README.md#prerequisites). For the full matrix of workspace commands, see [Build and Test the Contracts](./README.md#build-and-test-the-contracts) in the README.
+
 ---
 
 ## Development Workflow
