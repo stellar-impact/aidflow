@@ -181,16 +181,20 @@ cargo test --all
 
 ### Testnet Deployment
 
-Config and Escrow are live on Stellar testnet (deployed with `contracts/scripts/deploy-testnet.sh`):
+Config, Escrow and VoucherRegistry are live on Stellar testnet (deployed with `contracts/scripts/deploy-testnet.sh`):
 
 | Contract | ID |
 |----------|----|
-| Config | [`CATFQMMNYS3W7GZHHJWLXXQOITXTMD33C42XDYCIHCEZ5A4FQKT3N42V`](https://stellar.expert/explorer/testnet/contract/CATFQMMNYS3W7GZHHJWLXXQOITXTMD33C42XDYCIHCEZ5A4FQKT3N42V) |
-| Escrow | [`CDXHAOXO3GBH7WTNYHUMC5BKIFSELZ7QVNAFS5K57XWXJ2PC7C5CTKHX`](https://stellar.expert/explorer/testnet/contract/CDXHAOXO3GBH7WTNYHUMC5BKIFSELZ7QVNAFS5K57XWXJ2PC7C5CTKHX) |
+| Config | [`CA5BOZFSEAI5UG3QWJ2YR7OGPHYOGWXARYOURJ336OMWUUSWYVJ4ZQT2`](https://stellar.expert/explorer/testnet/contract/CA5BOZFSEAI5UG3QWJ2YR7OGPHYOGWXARYOURJ336OMWUUSWYVJ4ZQT2) |
+| Escrow | [`CDNKHCVUBBRP2UGWXVA6OK5TZ7WYD35SK5VFDKR3TYFNKDHHJWY4UE6L`](https://stellar.expert/explorer/testnet/contract/CDNKHCVUBBRP2UGWXVA6OK5TZ7WYD35SK5VFDKR3TYFNKDHHJWY4UE6L) |
+| VoucherRegistry | [`CBU6XWFLWGU4HWN6JOQYQQGHWIPYNW42N7GV3MK3SEMGGD56F3QUIHUW`](https://stellar.expert/explorer/testnet/contract/CBU6XWFLWGU4HWN6JOQYQQGHWIPYNW42N7GV3MK3SEMGGD56F3QUIHUW) |
+
+The full flow has been exercised on-chain: create program, fund, oracle attestation, admin
+release to the registry, batch voucher issuance, a claim, and an expiry that returned the
+funds to Escrow and re-credited the program.
 
 Testnet-only caveats: the settlement token is the native XLM asset contract (not USDC), and
-Escrow's `voucher_registry` is a placeholder address until `VoucherRegistry` is built, so
-`release()` is not meaningful yet. Admin and oracle keys are throwaway testnet identities.
+admin and oracle are throwaway testnet identities. MerchantRegistry is not built yet.
 
 ### Full Workspace
 

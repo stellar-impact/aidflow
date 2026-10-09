@@ -1,5 +1,5 @@
 #!/bin/bash
-# Deploy Config + Escrow to Stellar testnet from a local machine.
+# Deploy Config + Escrow + VoucherRegistry to Stellar testnet from a local machine.
 # Usage: ./scripts/deploy-testnet.sh
 # Requires stellar-cli 27.x. Creates/funds testnet-only identities if missing.
 set -euo pipefail
@@ -35,13 +35,21 @@ ESCROW_ID=$(stellar contract deploy \
   --wasm target/wasm32v1-none/release/aidflow_escrow.wasm \
   --source "$DEPLOYER" --network "$NETWORK")
 
-# VoucherRegistry is not built yet: the admin address is a placeholder.
-# It is only used by release(), so create/fund/attest work without it.
+REGISTRY_ID=$(stellar contract deploy \
+  --wasm target/wasm32v1-none/release/aidflow_voucher_registry.wasm \
+  --source "$DEPLOYER" --network "$NETWORK")
+
+# Escrow and registry reference each other, so both are deployed before either
+# is initialized.
 stellar contract invoke --id "$ESCROW_ID" --source "$DEPLOYER" --network "$NETWORK" \
-  -- init --config_contract "$CONFIG_ID" --token "$TOKEN_ID" --voucher_registry "$ADMIN_ADDR"
+  -- init --config_contract "$CONFIG_ID" --token "$TOKEN_ID" --voucher_registry "$REGISTRY_ID"
+
+stellar contract invoke --id "$REGISTRY_ID" --source "$DEPLOYER" --network "$NETWORK" \
+  -- init --config_contract "$CONFIG_ID" --escrow_contract "$ESCROW_ID" --token "$TOKEN_ID"
 
 echo "Config:  $CONFIG_ID"
 echo "Escrow:  $ESCROW_ID"
+echo "Registry: $REGISTRY_ID"
 echo "Token:   $TOKEN_ID"
 echo "Admin:   $ADMIN_ADDR"
 echo "Oracle:  $ORACLE_ADDR"
