@@ -5,7 +5,7 @@
 //! Shared type definitions used across all AidFlow Soroban contracts.
 //! All types are marked with stability annotations.
 
-use soroban_sdk::{contracttype, String};
+use soroban_sdk::{contracttype, Address, String};
 
 /// Represents a single milestone in an aid program.
 ///
@@ -47,6 +47,23 @@ pub enum VoucherStatus {
     Claimed,
     /// Voucher expired, funds returned to escrow
     Expired,
+}
+
+/// A voucher issued to a beneficiary, redeemable for `amount` of the
+/// settlement token until `expiry`.
+///
+/// @stable
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Voucher {
+    pub id: u64,
+    pub program_id: u64,
+    pub recipient: Address,
+    pub amount: i128,
+    pub status: VoucherStatus,
+    /// Ledger timestamp (seconds) after which the voucher can no longer be claimed
+    pub expiry: u64,
+    pub claimed_at: Option<u64>,
 }
 
 #[cfg(test)]

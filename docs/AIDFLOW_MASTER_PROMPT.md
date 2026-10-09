@@ -201,7 +201,7 @@ fn is_active(env, merchant) -> bool;
 
 **Events:** program_created · funded · milestone_attested{evidence_hash} · released · voucher_issued · voucher_claimed · voucher_redeemed · voucher_expired · refunded · paused/unpaused.
 
-**Gas & upgrade:** batch issuance (≤100/tx, paginate); lazy claim/redeem; store 32-byte hashes only; explicit TTL/rent per voucher; fee sponsorship via relayer; `update_current_contract_wasm` behind multisig + 48–72h timelock + `upgrade_scheduled` event; `schema_version` field + lazy migration on touch.
+**Gas & upgrade:** batch issuance (≤40/tx, paginate); lazy claim/redeem; store 32-byte hashes only; explicit TTL/rent per voucher; fee sponsorship via relayer; `update_current_contract_wasm` behind multisig + 48–72h timelock + `upgrade_scheduled` event; `schema_version` field + lazy migration on touch.
 
 ---
 

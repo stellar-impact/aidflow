@@ -1,0 +1,20 @@
+[package]
+name = "aidflow-voucher-registry"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+repository = "https://github.com/stellar-impact/aidflow"
+description = "Batch voucher issuance, claims, and expiry for AidFlow"
+
+[dependencies]
+soroban-sdk = { workspace = true }
+aidflow-contract-types = { path = "../types" }
+
+[lib]
+crate-type = ["cdylib"]
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }
+
+[features]
+testutils = ["soroban-sdk/testutils"]

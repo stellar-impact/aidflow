@@ -11,7 +11,7 @@ This document specifies the public interfaces for AidFlow Soroban smart contract
 
 ## Design Principles
 
-1. **Batch Operations:** Voucher issuance ≤100 per transaction, paginate larger batches
+1. **Batch Operations:** Voucher issuance ≤40 per transaction (Soroban allows 50 ledger writes per tx, one per voucher), paginate larger batches
 2. **Lazy Pull-Based Claims:** Beneficiaries pull vouchers (no push overhead)
 3. **Storage Efficiency:** Store 32-byte hashes only, evidence off-chain
 4. **Explicit TTL/Rent:** Per-voucher TTL management
@@ -125,6 +125,12 @@ fn refund_unspent(env: Env, program_id: u64);
 /// Get program details
 /// @stable
 fn get_program(env: Env, program_id: u64) -> Program;
+
+/// Accept funds returned by VoucherRegistry.expire (requires registry auth).
+/// Re-credits the program (lowers released_amount), or forwards to the funder
+/// if the program is already Refunded.
+/// @stable
+fn reclaim_expired(env: Env, program_id: u64, amount: i128);
 ```
 
 ### Types
@@ -169,6 +175,7 @@ pub enum ProgramStatus {
 - `milestone_attested(program_id: u64, milestone_id: u32, evidence_hash: BytesN<32>)`
 - `released(program_id: u64, milestone_id: u32, amount: i128)`
 - `refunded(program_id: u64, amount: i128)`
+- `reclaimed(program_id: u64, amount: i128)`
 
 ---
 
@@ -181,13 +188,15 @@ pub enum ProgramStatus {
 ### Functions
 
 ```rust
-/// Initialize with admin, escrow contract, and token address
+/// Initialize with the Config contract, escrow contract, and token address.
+/// Requires the Config admin's auth. Admin/pause are read from Config.
 /// @stable
-fn init(env: Env, admin: Address, escrow_contract: Address, token: Address);
+fn init(env: Env, config_contract: Address, escrow_contract: Address, token: Address);
 
-/// Issue batch of vouchers (requires escrow contract auth)
+/// Issue batch of vouchers (requires Config admin auth). Total issued plus
+/// outstanding must not exceed the registry's token balance.
 /// @stable
-/// Max 100 recipients per batch
+/// Max 40 recipients per batch
 /// Returns Vec<voucher_id>
 fn issue_batch(
     env: Env,
@@ -200,13 +209,18 @@ fn issue_batch(
 /// @stable
 fn claim(env: Env, voucher_id: u64);
 
-/// Expire a voucher and return funds to escrow (anyone can call after expiry)
+/// Expire a voucher and return funds to escrow (anyone can call after expiry).
+/// Calls Escrow.reclaim_expired so the program is re-credited.
 /// @stable
 fn expire(env: Env, voucher_id: u64);
 
 /// Get voucher details
 /// @stable
 fn get_voucher(env: Env, voucher_id: u64) -> Voucher;
+
+/// Sum of all Unclaimed voucher amounts
+/// @stable
+fn get_outstanding(env: Env) -> i128;
 ```
 
 ### Types
@@ -246,7 +260,7 @@ pub enum VoucherStatus {
 
 ### Constraints
 
-- Batch size ≤100 recipients (panics if exceeded)
+- Batch size ≤40 recipients (panics if exceeded)
 - Expiry checked via `env.ledger().timestamp()`
 - Token transfers via `TokenClient`
 

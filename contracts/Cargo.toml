@@ -3,7 +3,7 @@ members = [
     "types",
     "config",
     "escrow",              # Module 3
-    # "voucher_registry",  # Module 4
+    "voucher_registry",    # Module 4
     # "merchant_registry", # Module 4
 ]
 resolver = "2"

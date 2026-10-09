@@ -10,6 +10,10 @@ echo ""
 echo "Building aidflow-config..."
 stellar contract build --package aidflow-config
 
+# Build voucher registry
+echo "Building aidflow-voucher-registry..."
+stellar contract build --package aidflow-voucher-registry
+
 # Build escrow contract
 echo "Building aidflow-escrow..."
 stellar contract build --package aidflow-escrow

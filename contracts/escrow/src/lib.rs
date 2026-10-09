@@ -305,7 +305,7 @@ impl EscrowContract {
             .released_amount
             .checked_add(amount)
             .expect("released_amount overflow");
-        if program.released_amount == total_target(&program) {
+        if all_released(&env, &program) {
             program.status = ProgramStatus::Completed;
         }
         save_program(&env, &program);
@@ -358,6 +358,46 @@ impl EscrowContract {
 
         env.events()
             .publish((symbol_short!("refunded"),), (program_id, unspent));
+    }
+
+    /// Accept funds returned by the VoucherRegistry when a voucher expires.
+    /// Callable only by the registry, which transfers `amount` to this contract
+    /// immediately before calling.
+    ///
+    /// For an Active/Completed program the amount is credited back by lowering
+    /// `released_amount` (so `refund_unspent` returns it to the funder). For an
+    /// already-Refunded program it is forwarded straight to the funder, so it
+    /// can never be stranded here.
+    ///
+    /// @stable
+    pub fn reclaim_expired(env: Env, program_id: u64, amount: i128) {
+        let registry: Address = env
+            .storage()
+            .instance()
+            .get(&DataKey::VoucherRegistry)
+            .unwrap();
+        registry.require_auth();
+        ensure_not_paused(&env);
+        if amount <= 0 {
+            panic!("amount must be positive");
+        }
+
+        let mut program = load_program(&env, program_id);
+        if program.status == ProgramStatus::Refunded {
+            let token: Address = env.storage().instance().get(&DataKey::Token).unwrap();
+            let here = env.current_contract_address();
+            token::TokenClient::new(&env, &token).transfer(&here, &program.funder, &amount);
+        } else {
+            program.released_amount = program
+                .released_amount
+                .checked_sub(amount)
+                .filter(|v| *v >= 0)
+                .expect("reclaim exceeds released amount");
+            save_program(&env, &program);
+        }
+
+        env.events()
+            .publish((symbol_short!("reclaimed"),), (program_id, amount));
     }
 
     /// Get a program's details.
@@ -434,15 +474,17 @@ fn milestone_amount(program: &Program, milestone_id: u32) -> Option<i128> {
     None
 }
 
-fn total_target(program: &Program) -> i128 {
-    let mut total: i128 = 0;
+/// True once every milestone has been released. Completion is keyed on the
+/// per-milestone flags (not on `released_amount`) because `reclaim_expired`
+/// can lower `released_amount` after a release.
+fn all_released(env: &Env, program: &Program) -> bool {
     let len = program.milestones.len();
     for i in 0..len {
-        total = total
-            .checked_add(program.milestones.get(i).unwrap().target_amount)
-            .expect("total target overflow");
+        if !is_released(env, program.id, program.milestones.get(i).unwrap().id) {
+            return false;
+        }
     }
-    total
+    true
 }
 
 // ---- Config (access control + circuit breaker) queries ----
@@ -1021,5 +1063,114 @@ mod test {
         e.release(&pid, &1); // -> Completed
         e.refund_unspent(&pid); // -> Refunded
         e.refund_unspent(&pid); // status now Refunded, not Completed
+    }
+
+    // ---- reclaim_expired (VoucherRegistry hook) ----
+
+    // Simulate the registry returning `amount` to escrow, as `expire` does.
+    fn registry_returns(s: &Setup, pid: u64, amount: i128) {
+        tokens(s).transfer(&s.registry, &s.escrow_id, &amount);
+        escrow(s).reclaim_expired(&pid, &amount);
+    }
+
+    #[test]
+    fn reclaim_then_refund_returns_expired_funds_to_funder() {
+        let s = setup();
+        let e = escrow(&s);
+        let pid = e.create_program(&s.funder, &s.token, &two_milestones(&s.env));
+        e.fund(&pid, &1000);
+        e.attest_milestone(&pid, &1, &hash(&s.env));
+        e.release(&pid, &1);
+        e.attest_milestone(&pid, &2, &hash(&s.env));
+        e.release(&pid, &2); // Completed, unspent == 0
+
+        registry_returns(&s, pid, 100);
+        assert_eq!(e.get_program(&pid).released_amount, 900);
+
+        e.refund_unspent(&pid);
+        assert_eq!(tokens(&s).balance(&s.funder), INITIAL_MINT - 900);
+        assert_eq!(tokens(&s).balance(&s.escrow_id), 0);
+    }
+
+    #[test]
+    fn reclaim_midway_does_not_block_completion() {
+        let s = setup();
+        let e = escrow(&s);
+        let pid = e.create_program(&s.funder, &s.token, &two_milestones(&s.env));
+        e.fund(&pid, &1000);
+        e.attest_milestone(&pid, &1, &hash(&s.env));
+        e.release(&pid, &1);
+        registry_returns(&s, pid, 100);
+
+        e.attest_milestone(&pid, &2, &hash(&s.env));
+        e.release(&pid, &2);
+        // released_amount (900) != total target (1000), yet the program completes.
+        assert_eq!(e.get_program(&pid).status, ProgramStatus::Completed);
+    }
+
+    #[test]
+    fn reclaim_after_refund_forwards_to_funder() {
+        let s = setup();
+        let e = escrow(&s);
+        let pid = e.create_program(&s.funder, &s.token, &one_milestone(&s.env));
+        e.fund(&pid, &1000);
+        e.attest_milestone(&pid, &1, &hash(&s.env));
+        e.release(&pid, &1);
+        e.refund_unspent(&pid); // 600 back to funder; status Refunded
+        assert_eq!(tokens(&s).balance(&s.funder), INITIAL_MINT - 400);
+
+        registry_returns(&s, pid, 100);
+        // Forwarded immediately: nothing stranded in escrow.
+        assert_eq!(tokens(&s).balance(&s.escrow_id), 0);
+        assert_eq!(tokens(&s).balance(&s.funder), INITIAL_MINT - 300);
+    }
+
+    #[test]
+    #[should_panic(expected = "reclaim exceeds released amount")]
+    fn reclaim_more_than_released_rejected() {
+        let s = setup();
+        let e = escrow(&s);
+        let pid = e.create_program(&s.funder, &s.token, &one_milestone(&s.env));
+        e.fund(&pid, &400);
+        e.attest_milestone(&pid, &1, &hash(&s.env));
+        e.release(&pid, &1);
+        e.reclaim_expired(&pid, &401);
+    }
+
+    #[test]
+    #[should_panic(expected = "amount must be positive")]
+    fn reclaim_zero_rejected() {
+        let s = setup();
+        let e = escrow(&s);
+        let pid = e.create_program(&s.funder, &s.token, &one_milestone(&s.env));
+        e.reclaim_expired(&pid, &0);
+    }
+
+    #[test]
+    #[should_panic(expected = "contract is paused")]
+    fn reclaim_blocked_when_paused() {
+        let s = setup();
+        let e = escrow(&s);
+        let pid = e.create_program(&s.funder, &s.token, &one_milestone(&s.env));
+        config(&s).set_paused(&true);
+        e.reclaim_expired(&pid, &1);
+    }
+
+    #[test]
+    #[should_panic]
+    fn reclaim_rejects_non_registry_caller() {
+        let s = setup();
+        let e = escrow(&s);
+        let pid = e.create_program(&s.funder, &s.token, &one_milestone(&s.env));
+        s.env.mock_auths(&[MockAuth {
+            address: &s.admin,
+            invoke: &MockAuthInvoke {
+                contract: &s.escrow_id,
+                fn_name: "reclaim_expired",
+                args: (pid, 1i128).into_val(&s.env),
+                sub_invokes: &[],
+            },
+        }]);
+        e.reclaim_expired(&pid, &1);
     }
 }

@@ -117,7 +117,7 @@ We take security seriously. If you discover a security vulnerability in AidFlow,
 
 - **Two-Key Release:** Oracle attests, admin releases (no single point of failure)
 - **Circuit Breaker:** Admin can pause all operations
-- **Batch Limits:** Max 100 vouchers per transaction (DoS mitigation)
+- **Batch Limits:** Max 40 vouchers per transaction (DoS mitigation)
 - **Lazy Claims:** Pull-based (no push overhead or griefing)
 - **Event Logging:** All critical actions emit events
 
