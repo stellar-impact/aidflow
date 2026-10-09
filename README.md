@@ -81,8 +81,8 @@ flowchart TD
         TYP["Types &#10003;"]
         CFG["Config &#10003;"]
         ESC["Escrow &#10003;"]
-        VR["VoucherRegistry &#128679;"]
-        MR["MerchantRegistry &#128679;"]
+        VR["VoucherRegistry &#10003;"]
+        MR["MerchantRegistry &#10003;"]
     end
 
     STELLAR["Stellar Network<br/>Testnet &rarr; Mainnet"]
@@ -92,8 +92,8 @@ flowchart TD
     classDef built fill:#dcfce7,stroke:#16a34a,color:#14532d;
     classDef planned fill:#f1f5f9,stroke:#94a3b8,color:#475569,stroke-dasharray:4 3;
 
-    class TYP,CFG,ESC built;
-    class VR,MR,ON,OR,IX,RL,SDK,DD,BP,MA planned;
+    class TYP,CFG,ESC,VR,MR built;
+    class ON,OR,IX,RL,SDK,DD,BP,MA planned;
 ```
 
 > **Status legend:** &#10003; implemented and tested &nbsp;·&nbsp; &#128679; scaffolded, not yet implemented &nbsp;·&nbsp; dashed = planned.
@@ -121,8 +121,8 @@ WASM builds) on every push.
 | **Types** | `aidflow-contract-types` | ✅ Implemented | Shared, stable types consumed across the workspace |
 | **Config** | `aidflow-config` | ✅ Implemented | Admin/oracle registry, pause circuit-breaker, instance-storage keys with TTL management |
 | **Escrow** | `aidflow-escrow` | ✅ Implemented | Programs, milestones, funding, two-key attest/release, unspent refund |
-| **VoucherRegistry** | `aidflow-voucher-registry` | 🚧 Planned | Batch issuance, pull-based claims, expiry |
-| **MerchantRegistry** | `aidflow-merchant-registry` | 🚧 Planned | Merchant allowlist, redemption, category tagging |
+| **VoucherRegistry** | `aidflow-voucher-registry` | ✅ Implemented | Admin-gated batch issuance (max 40), pull-based claims, permissionless expiry back to Escrow |
+| **MerchantRegistry** | `aidflow-merchant-registry` | ✅ Implemented | Merchant allowlist, redemption to payout address, category tagging |
 
 ### Engineering Safeguards
 
@@ -170,13 +170,13 @@ This is the fastest path to a green checkout — no external services required:
 git clone https://github.com/stellar-impact/aidflow.git
 cd aidflow/contracts
 
-# Run the full workspace test suite (37 tests across types, config, escrow)
+# Run the full workspace test suite (96 tests across types, config, escrow, voucher and merchant registries)
 cargo test --all
 
 # Optimized WASM build for all contracts
 ./scripts/build.sh
 # → target/wasm32v1-none/release/aidflow_config.wasm
-# → target/wasm32v1-none/release/aidflow_escrow.wasm
+# → target/wasm32v1-none/release/aidflow_escrow.wasm (plus the two registries)
 ```
 
 ### Testnet Deployment

@@ -66,6 +66,28 @@ pub struct Voucher {
     pub claimed_at: Option<u64>,
 }
 
+/// Merchant categories (the `Merchant.category` values).
+pub const CATEGORY_FOOD: u32 = 1;
+pub const CATEGORY_HEALTH: u32 = 2;
+pub const CATEGORY_EDUCATION: u32 = 3;
+pub const CATEGORY_AGRICULTURE: u32 = 4;
+pub const CATEGORY_OTHER: u32 = 5;
+
+/// A merchant approved to accept voucher redemptions.
+///
+/// @stable
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Merchant {
+    /// Identity the merchant is registered (and looked up) under
+    pub address: Address,
+    /// Address that receives settlement when beneficiaries redeem
+    pub payout: Address,
+    /// One of the `CATEGORY_*` values
+    pub category: u32,
+    pub active: bool,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

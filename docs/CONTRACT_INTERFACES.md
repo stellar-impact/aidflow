@@ -275,31 +275,40 @@ pub enum VoucherStatus {
 ### Functions
 
 ```rust
-/// Initialize with admin and token address
+/// Initialize with the Config contract and token address.
+/// Requires the Config admin's auth. Admin/pause are read from Config.
 /// @stable
-fn init(env: Env, admin: Address, token: Address);
+fn init(env: Env, config_contract: Address, token: Address);
 
-/// Register a merchant (requires admin auth)
+/// Register a merchant (requires admin auth). Upsert: re-registering updates
+/// payout/category and reactivates. category must be 1..=5. Blocked when paused.
 /// @stable
 fn register(env: Env, merchant: Address, payout: Address, category: u32);
 
-/// Deactivate a merchant (requires admin auth)
+/// Deactivate a merchant (requires admin auth). Allowed while paused, since it
+/// only reduces risk. Panics if unknown or already inactive.
 /// @stable
 fn deactivate(env: Env, merchant: Address);
 
-/// Redeem tokens from beneficiary to merchant (requires from auth)
+/// Redeem tokens from beneficiary to the merchant's payout address (requires
+/// `from` auth). Rejects unregistered/inactive merchants and amount <= 0.
+/// Blocked when paused.
 /// @stable
 fn redeem(env: Env, from: Address, merchant: Address, amount: i128);
 
-/// Check if merchant is active
+/// Check if merchant is registered and active (false if unknown)
 /// @stable
 fn is_active(env: Env, merchant: Address) -> bool;
+
+/// Get a merchant's record (panics if unknown)
+/// @stable
+fn get_merchant(env: Env, merchant: Address) -> Merchant;
 ```
 
 ### Types
 
 ```rust
-/// @stable
+/// @stable (lives in aidflow-contract-types)
 pub struct Merchant {
     pub address: Address,
     pub payout: Address,
@@ -311,8 +320,11 @@ pub struct Merchant {
 ### Storage
 
 - `MERCHANTS`: Map<Address, Merchant> (persistent storage with TTL)
-- `ADMIN`: Address (instance storage)
+- `CONFIG`: Address (instance storage)
 - `TOKEN_ADDRESS`: Address (instance storage)
+
+The registry never custodies funds: `redeem` transfers directly from the
+beneficiary to the merchant's payout address.
 
 ### Events
 
@@ -321,6 +333,8 @@ pub struct Merchant {
 - `voucher_redeemed(from: Address, merchant: Address, amount: i128)`
 
 ### Categories
+
+Constants `CATEGORY_*` in `aidflow-contract-types`:
 
 - `1` — Food
 - `2` — Health

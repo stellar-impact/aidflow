@@ -14,6 +14,10 @@ stellar contract build --package aidflow-config
 echo "Building aidflow-voucher-registry..."
 stellar contract build --package aidflow-voucher-registry
 
+# Build merchant registry
+echo "Building aidflow-merchant-registry..."
+stellar contract build --package aidflow-merchant-registry
+
 # Build escrow contract
 echo "Building aidflow-escrow..."
 stellar contract build --package aidflow-escrow
