@@ -265,8 +265,7 @@ impl EscrowContract {
     ///
     /// @stable
     pub fn release(env: Env, program_id: u64, milestone_id: u32) {
-        let admin = require_admin(&env);
-        let _ = &admin;
+        require_admin(&env);
         ensure_not_paused(&env);
 
         let mut program = load_program(&env, program_id);
