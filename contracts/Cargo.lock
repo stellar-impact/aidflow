@@ -38,6 +38,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "aidflow-integration-tests"
+version = "0.1.0"
+dependencies = [
+ "aidflow-config",
+ "aidflow-contract-types",
+ "aidflow-escrow",
+ "soroban-sdk",
+]
+
+[[package]]
 name = "aidflow-merchant-registry"
 version = "0.1.0"
 dependencies = [

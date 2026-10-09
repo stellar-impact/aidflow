@@ -11,7 +11,7 @@ soroban-sdk = { workspace = true }
 aidflow-contract-types = { path = "../types" }
 
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "rlib"]
 
 [dev-dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }

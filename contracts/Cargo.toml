@@ -2,9 +2,10 @@
 members = [
     "types",
     "config",
-    "escrow",              # Module 3
-    "voucher_registry",    # Module 4
-    "merchant_registry",   # Module 4
+    "escrow",            # Module 3
+    "voucher_registry",  # Module 4
+    "merchant_registry", # Module 4
+    "integration-tests", # Cross-contract integration tests
 ]
 resolver = "2"
 

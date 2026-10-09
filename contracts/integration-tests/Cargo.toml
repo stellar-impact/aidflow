@@ -1,0 +1,18 @@
+[package]
+name = "aidflow-integration-tests"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+repository = "https://github.com/stellar-impact/aidflow"
+description = "Cross-contract integration tests for AidFlow"
+
+[dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }
+aidflow-contract-types = { path = "../types" }
+# Import the real contracts (this crate exists only for testing)
+aidflow-config = { path = "../config", features = ["testutils"] }
+aidflow-escrow = { path = "../escrow", features = ["testutils"] }
+
+[lib]
+# Regular lib crate so tests live in tests/ subdirectory
+crate-type = ["lib"]
