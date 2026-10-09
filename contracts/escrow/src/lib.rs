@@ -87,7 +87,7 @@ pub struct AttestationRecord {
 
 /// Event emitted when a milestone is attested
 #[contractevent]
-pub struct Attested {
+pub struct MilestoneAttested {
     pub program_id: u64,
     pub milestone_id: u32,
     pub evidence_hash: BytesN<32>,
@@ -296,7 +296,7 @@ impl EscrowContract {
         env.storage().persistent().set(&key, &record);
         bump_persistent_ttl(&env, &key);
 
-        Attested {
+        MilestoneAttested {
             program_id,
             milestone_id,
             evidence_hash,
@@ -1219,5 +1219,175 @@ mod test {
             },
         }]);
         e.reclaim_expired(&pid, &1);
+    }
+
+    /// Emitted events: payload checks and pinned topic names (indexers key on these).
+    mod events {
+        use super::*;
+        use soroban_sdk::events::Event;
+        use soroban_sdk::testutils::Events as _;
+
+        fn emitted<E: Event>(s: &Setup, e: E) -> bool {
+            s.env
+                .events()
+                .all()
+                .events()
+                .contains(&e.to_xdr(&s.env, &s.escrow_id))
+        }
+
+        #[test]
+        fn create_program_emits_program_created() {
+            let s = setup();
+            let pid = escrow(&s).create_program(&s.funder, &s.token, &one_milestone(&s.env));
+            assert!(emitted(
+                &s,
+                ProgramCreated {
+                    program_id: pid,
+                    funder: s.funder.clone()
+                }
+            ));
+        }
+
+        #[test]
+        fn fund_emits_funded() {
+            let s = setup();
+            let pid = escrow(&s).create_program(&s.funder, &s.token, &one_milestone(&s.env));
+            escrow(&s).fund(&pid, &400);
+            assert!(emitted(
+                &s,
+                Funded {
+                    program_id: pid,
+                    amount: 400
+                }
+            ));
+        }
+
+        #[test]
+        fn attest_emits_milestone_attested() {
+            let s = setup();
+            let pid = escrow(&s).create_program(&s.funder, &s.token, &one_milestone(&s.env));
+            escrow(&s).attest_milestone(&pid, &1, &hash(&s.env));
+            assert!(emitted(
+                &s,
+                MilestoneAttested {
+                    program_id: pid,
+                    milestone_id: 1,
+                    evidence_hash: hash(&s.env)
+                }
+            ));
+        }
+
+        #[test]
+        fn release_emits_released() {
+            let s = setup();
+            let e = escrow(&s);
+            let pid = e.create_program(&s.funder, &s.token, &one_milestone(&s.env));
+            e.fund(&pid, &400);
+            e.attest_milestone(&pid, &1, &hash(&s.env));
+            e.release(&pid, &1);
+            assert!(emitted(
+                &s,
+                Released {
+                    program_id: pid,
+                    milestone_id: 1,
+                    amount: 400
+                }
+            ));
+        }
+
+        #[test]
+        fn refund_emits_refunded() {
+            let s = setup();
+            let e = escrow(&s);
+            let pid = e.create_program(&s.funder, &s.token, &one_milestone(&s.env));
+            e.fund(&pid, &1000);
+            e.attest_milestone(&pid, &1, &hash(&s.env));
+            e.release(&pid, &1);
+            e.refund_unspent(&pid);
+            assert!(emitted(
+                &s,
+                Refunded {
+                    program_id: pid,
+                    amount: 600
+                }
+            ));
+        }
+
+        #[test]
+        fn reclaim_emits_reclaimed() {
+            let s = setup();
+            let e = escrow(&s);
+            let pid = e.create_program(&s.funder, &s.token, &one_milestone(&s.env));
+            e.fund(&pid, &400);
+            e.attest_milestone(&pid, &1, &hash(&s.env));
+            e.release(&pid, &1);
+            registry_returns(&s, pid, 100);
+            assert!(emitted(
+                &s,
+                Reclaimed {
+                    program_id: pid,
+                    amount: 100
+                }
+            ));
+        }
+
+        #[test]
+        fn topic_names_are_pinned() {
+            let env = Env::default();
+            let h = BytesN::from_array(&env, &[0u8; 32]);
+            let funder = Address::generate(&env);
+            let topic =
+                |name: &str| soroban_sdk::vec![&env, Symbol::new(&env, name).into_val(&env)];
+            assert_eq!(
+                ProgramCreated {
+                    program_id: 1,
+                    funder
+                }
+                .topics(&env),
+                topic("program_created")
+            );
+            assert_eq!(
+                Funded {
+                    program_id: 1,
+                    amount: 1
+                }
+                .topics(&env),
+                topic("funded")
+            );
+            assert_eq!(
+                MilestoneAttested {
+                    program_id: 1,
+                    milestone_id: 1,
+                    evidence_hash: h
+                }
+                .topics(&env),
+                topic("milestone_attested")
+            );
+            assert_eq!(
+                Released {
+                    program_id: 1,
+                    milestone_id: 1,
+                    amount: 1
+                }
+                .topics(&env),
+                topic("released")
+            );
+            assert_eq!(
+                Refunded {
+                    program_id: 1,
+                    amount: 1
+                }
+                .topics(&env),
+                topic("refunded")
+            );
+            assert_eq!(
+                Reclaimed {
+                    program_id: 1,
+                    amount: 1
+                }
+                .topics(&env),
+                topic("reclaimed")
+            );
+        }
     }
 }

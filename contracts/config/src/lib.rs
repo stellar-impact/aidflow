@@ -331,4 +331,93 @@ mod tests {
 
         assert_eq!(client.get_oracle(), new_oracle);
     }
+
+    /// Emitted events: payload checks and pinned topic names (indexers key on these).
+    mod events {
+        use super::*;
+        use soroban_sdk::events::Event;
+        use soroban_sdk::testutils::Events as _;
+        use soroban_sdk::{vec, IntoVal, Symbol};
+
+        fn setup(env: &Env) -> (ConfigContractClient<'_>, Address, Address, Address) {
+            env.mock_all_auths();
+            let id = env.register(ConfigContract, ());
+            let client = ConfigContractClient::new(env, &id);
+            let admin = Address::generate(env);
+            let oracle = Address::generate(env);
+            client.init(&admin, &oracle);
+            (client, id, admin, oracle)
+        }
+
+        fn emitted<E: Event>(env: &Env, id: &Address, e: E) -> bool {
+            env.events().all().events().contains(&e.to_xdr(env, id))
+        }
+
+        #[test]
+        fn set_admin_emits_admin_updated() {
+            let env = Env::default();
+            let (client, id, admin, _) = setup(&env);
+            let new_admin = Address::generate(&env);
+            client.set_admin(&new_admin);
+            assert!(emitted(
+                &env,
+                &id,
+                AdminUpdated {
+                    old_admin: admin,
+                    new_admin
+                }
+            ));
+        }
+
+        #[test]
+        fn set_oracle_emits_oracle_updated() {
+            let env = Env::default();
+            let (client, id, _, oracle) = setup(&env);
+            let new_oracle = Address::generate(&env);
+            client.set_oracle(&new_oracle);
+            assert!(emitted(
+                &env,
+                &id,
+                OracleUpdated {
+                    old_oracle: oracle,
+                    new_oracle
+                }
+            ));
+        }
+
+        #[test]
+        fn pause_and_unpause_emit_events() {
+            let env = Env::default();
+            let (client, id, _, _) = setup(&env);
+            client.pause();
+            assert!(emitted(&env, &id, Paused {}));
+            client.unpause();
+            assert!(emitted(&env, &id, Unpaused {}));
+        }
+
+        #[test]
+        fn topic_names_are_pinned() {
+            let env = Env::default();
+            let a = Address::generate(&env);
+            let topic = |name: &str| vec![&env, Symbol::new(&env, name).into_val(&env)];
+            assert_eq!(
+                AdminUpdated {
+                    old_admin: a.clone(),
+                    new_admin: a.clone()
+                }
+                .topics(&env),
+                topic("admin_updated")
+            );
+            assert_eq!(
+                OracleUpdated {
+                    old_oracle: a.clone(),
+                    new_oracle: a
+                }
+                .topics(&env),
+                topic("oracle_updated")
+            );
+            assert_eq!(Paused {}.topics(&env), topic("paused"));
+            assert_eq!(Unpaused {}.topics(&env), topic("unpaused"));
+        }
+    }
 }

@@ -170,7 +170,7 @@ This is the fastest path to a green checkout — no external services required:
 git clone https://github.com/stellar-impact/aidflow.git
 cd aidflow/contracts
 
-# Run the full workspace test suite (96 tests across types, config, escrow, voucher and merchant registries)
+# Run the full workspace test suite (115 tests across types, config, escrow, voucher and merchant registries)
 cargo test --all
 
 # Optimized WASM build for all contracts

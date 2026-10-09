@@ -579,4 +579,92 @@ mod test {
         let s = setup();
         reg(&s).init(&s.config_id, &s.token);
     }
+
+    /// Emitted events: payload checks and pinned topic names (indexers key on these).
+    mod events {
+        use super::*;
+        use soroban_sdk::events::Event;
+        use soroban_sdk::testutils::Events as _;
+        use soroban_sdk::vec;
+
+        fn emitted<E: Event>(s: &Setup, e: E) -> bool {
+            s.env
+                .events()
+                .all()
+                .events()
+                .contains(&e.to_xdr(&s.env, &s.registry_id))
+        }
+
+        #[test]
+        fn register_emits_merchant_registered() {
+            let s = setup();
+            registered(&s);
+            assert!(emitted(
+                &s,
+                MerchantRegistered {
+                    merchant: s.merchant.clone(),
+                    category: CATEGORY_FOOD
+                }
+            ));
+        }
+
+        #[test]
+        fn deactivate_emits_merchant_deactivated() {
+            let s = setup();
+            registered(&s);
+            reg(&s).deactivate(&s.merchant);
+            assert!(emitted(
+                &s,
+                MerchantDeactivated {
+                    merchant: s.merchant.clone()
+                }
+            ));
+        }
+
+        #[test]
+        fn redeem_emits_voucher_redeemed() {
+            let s = setup();
+            registered(&s);
+            reg(&s).redeem(&s.beneficiary, &s.merchant, &300);
+            assert!(emitted(
+                &s,
+                VoucherRedeemed {
+                    from: s.beneficiary.clone(),
+                    merchant: s.merchant.clone(),
+                    amount: 300
+                }
+            ));
+        }
+
+        #[test]
+        fn topic_names_are_pinned() {
+            let env = Env::default();
+            let a = Address::generate(&env);
+            let topic = |name: &str| vec![&env, Symbol::new(&env, name).into_val(&env)];
+            assert_eq!(
+                MerchantRegistered {
+                    merchant: a.clone(),
+                    category: 1
+                }
+                .topics(&env),
+                topic("merchant_registered")
+            );
+            assert_eq!(
+                MerchantDeactivated {
+                    merchant: a.clone()
+                }
+                .topics(&env),
+                topic("merchant_deactivated")
+            );
+            assert_eq!(
+                VoucherRedeemed {
+                    from: a.clone(),
+                    merchant: a,
+                    amount: 1
+                }
+                .topics(&env),
+                topic("voucher_redeemed")
+            );
+        }
+    }
 }

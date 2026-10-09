@@ -19,6 +19,14 @@ This document specifies the public interfaces for AidFlow Soroban smart contract
 6. **Upgradability:** `update_current_contract_wasm` behind multisig + 48-72h timelock
 7. **Schema Versioning:** `schema_version` field + lazy migration on touch
 
+### Event Encoding
+
+Events are typed structs emitted with `#[contractevent]` (soroban-sdk 26.1). Each event has a
+single topic, the snake_case event name (for example `program_created`), and its data is a
+**map keyed by field name** (not a positional list). Field names are exactly the ones listed
+under each contract's "Events" section below. The topic names are pinned by unit tests, so a
+rename is a deliberate, visible change. Indexers should decode data by key.
+
 ---
 
 ## Config / AccessControl Contract

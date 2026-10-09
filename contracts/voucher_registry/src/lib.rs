@@ -805,4 +805,101 @@ mod test {
         let s = setup();
         reg(&s).init(&s.config_id, &s.escrow_id, &s.token);
     }
+
+    /// Emitted events: payload checks and pinned topic names (indexers key on these).
+    mod events {
+        use super::*;
+        use soroban_sdk::events::Event;
+        use soroban_sdk::testutils::Events as _;
+
+        fn emitted<E: Event>(s: &Setup, e: E) -> bool {
+            s.env
+                .events()
+                .all()
+                .events()
+                .contains(&e.to_xdr(&s.env, &s.registry_id))
+        }
+
+        #[test]
+        fn issue_emits_voucher_issued() {
+            let s = setup();
+            let (who, r) = one(&s, 300);
+            reg(&s).issue_batch(&7, &r, &EXPIRY);
+            assert!(emitted(
+                &s,
+                VoucherIssued {
+                    voucher_id: 1,
+                    program_id: 7,
+                    recipient: who,
+                    amount: 300
+                }
+            ));
+        }
+
+        #[test]
+        fn claim_emits_voucher_claimed() {
+            let s = setup();
+            let (who, r) = one(&s, 300);
+            reg(&s).issue_batch(&7, &r, &EXPIRY);
+            reg(&s).claim(&1);
+            assert!(emitted(
+                &s,
+                VoucherClaimed {
+                    voucher_id: 1,
+                    recipient: who,
+                    amount: 300
+                }
+            ));
+        }
+
+        #[test]
+        fn expire_emits_voucher_expired() {
+            let s = setup();
+            let (_, r) = one(&s, 300);
+            reg(&s).issue_batch(&7, &r, &EXPIRY);
+            warp(&s, EXPIRY + 1);
+            reg(&s).expire(&1);
+            assert!(emitted(
+                &s,
+                VoucherExpired {
+                    voucher_id: 1,
+                    amount: 300
+                }
+            ));
+        }
+
+        #[test]
+        fn topic_names_are_pinned() {
+            let env = Env::default();
+            let a = Address::generate(&env);
+            let topic = |name: &str| vec![&env, Symbol::new(&env, name).into_val(&env)];
+            assert_eq!(
+                VoucherIssued {
+                    voucher_id: 1,
+                    program_id: 1,
+                    recipient: a.clone(),
+                    amount: 1
+                }
+                .topics(&env),
+                topic("voucher_issued")
+            );
+            assert_eq!(
+                VoucherClaimed {
+                    voucher_id: 1,
+                    recipient: a,
+                    amount: 1
+                }
+                .topics(&env),
+                topic("voucher_claimed")
+            );
+            assert_eq!(
+                VoucherExpired {
+                    voucher_id: 1,
+                    amount: 1
+                }
+                .topics(&env),
+                topic("voucher_expired")
+            );
+        }
+    }
 }
