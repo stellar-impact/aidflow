@@ -181,20 +181,22 @@ cargo test --all
 
 ### Testnet Deployment
 
-Config, Escrow and VoucherRegistry are live on Stellar testnet (deployed with `contracts/scripts/deploy-testnet.sh`):
+All four contracts are live on Stellar testnet (deployed with `contracts/scripts/deploy-testnet.sh`):
 
 | Contract | ID |
 |----------|----|
-| Config | [`CA5BOZFSEAI5UG3QWJ2YR7OGPHYOGWXARYOURJ336OMWUUSWYVJ4ZQT2`](https://stellar.expert/explorer/testnet/contract/CA5BOZFSEAI5UG3QWJ2YR7OGPHYOGWXARYOURJ336OMWUUSWYVJ4ZQT2) |
-| Escrow | [`CDNKHCVUBBRP2UGWXVA6OK5TZ7WYD35SK5VFDKR3TYFNKDHHJWY4UE6L`](https://stellar.expert/explorer/testnet/contract/CDNKHCVUBBRP2UGWXVA6OK5TZ7WYD35SK5VFDKR3TYFNKDHHJWY4UE6L) |
-| VoucherRegistry | [`CBU6XWFLWGU4HWN6JOQYQQGHWIPYNW42N7GV3MK3SEMGGD56F3QUIHUW`](https://stellar.expert/explorer/testnet/contract/CBU6XWFLWGU4HWN6JOQYQQGHWIPYNW42N7GV3MK3SEMGGD56F3QUIHUW) |
+| Config | [`CASHFZM3IVJD4626QXM6XKYK64YV44D3EGAC4GIYGSSV3ULAXXXHANLN`](https://stellar.expert/explorer/testnet/contract/CASHFZM3IVJD4626QXM6XKYK64YV44D3EGAC4GIYGSSV3ULAXXXHANLN) |
+| Escrow | [`CBF5SA4EAHZOYSMARBFBFOH7KJKH237LKHPHIOSVDHQ7HYL5KG3EWLVP`](https://stellar.expert/explorer/testnet/contract/CBF5SA4EAHZOYSMARBFBFOH7KJKH237LKHPHIOSVDHQ7HYL5KG3EWLVP) |
+| VoucherRegistry | [`CD5X5WGNKNYCRTUWOKSQTC2PANSJRRKBPO5JDWRUGBNC4GKLNJXMQR7G`](https://stellar.expert/explorer/testnet/contract/CD5X5WGNKNYCRTUWOKSQTC2PANSJRRKBPO5JDWRUGBNC4GKLNJXMQR7G) |
+| MerchantRegistry | [`CCQPQFR762BJ5GLMCR7P4BEM4PEHPD5UVRSGSJBWQ5PM6GFXK33L5OPP`](https://stellar.expert/explorer/testnet/contract/CCQPQFR762BJ5GLMCR7P4BEM4PEHPD5UVRSGSJBWQ5PM6GFXK33L5OPP) |
 
-The full flow has been exercised on-chain: create program, fund, oracle attestation, admin
-release to the registry, batch voucher issuance, a claim, and an expiry that returned the
-funds to Escrow and re-credited the program.
+The flow has been exercised on-chain: create program, fund, oracle attestation, admin
+release to the voucher registry, batch voucher issuance, a claim, an expiry that returned
+funds to Escrow and re-credited the program, and merchant registration, redemption and
+deactivation.
 
 Testnet-only caveats: the settlement token is the native XLM asset contract (not USDC), and
-admin and oracle are throwaway testnet identities. MerchantRegistry is not built yet.
+admin and oracle are throwaway testnet identities.
 
 ### Full Workspace
 
