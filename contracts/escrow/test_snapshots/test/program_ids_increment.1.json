@@ -974,16 +974,26 @@
           "v0": {
             "topics": [
               {
-                "symbol": "prog_new"
+                "symbol": "program_created"
               }
             ],
             "data": {
-              "vec": [
+              "map": [
                 {
-                  "u64": "2"
+                  "key": {
+                    "symbol": "funder"
+                  },
+                  "val": {
+                    "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
+                  }
                 },
                 {
-                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
+                  "key": {
+                    "symbol": "program_id"
+                  },
+                  "val": {
+                    "u64": "2"
+                  }
                 }
               ]
             }

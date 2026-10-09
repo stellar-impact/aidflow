@@ -792,18 +792,38 @@
               }
             ],
             "data": {
-              "vec": [
+              "map": [
                 {
-                  "u64": "2"
+                  "key": {
+                    "symbol": "amount"
+                  },
+                  "val": {
+                    "i128": "10"
+                  }
                 },
                 {
-                  "u64": "1"
+                  "key": {
+                    "symbol": "program_id"
+                  },
+                  "val": {
+                    "u64": "1"
+                  }
                 },
                 {
-                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOLZM"
+                  "key": {
+                    "symbol": "recipient"
+                  },
+                  "val": {
+                    "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOLZM"
+                  }
                 },
                 {
-                  "i128": "10"
+                  "key": {
+                    "symbol": "voucher_id"
+                  },
+                  "val": {
+                    "u64": "2"
+                  }
                 }
               ]
             }

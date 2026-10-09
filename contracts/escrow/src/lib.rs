@@ -1,8 +1,4 @@
 #![no_std]
-// AGENT-FLAG: events use env.events().publish() (deprecated in soroban-sdk 26.1).
-// Kept consistent with the config contract; migrate all contracts to the
-// #[contractevent] macro together in a dedicated events pass.
-#![allow(deprecated)]
 
 //! AidFlow Escrow Contract
 //!
@@ -33,7 +29,7 @@
 
 use aidflow_contract_types::{Milestone, ProgramStatus};
 use soroban_sdk::{
-    contract, contractimpl, contracttype, symbol_short, token, Address, BytesN, Env, Symbol, Vec,
+    contract, contractevent, contractimpl, contracttype, token, Address, BytesN, Env, Symbol, Vec,
 };
 
 /// Instance-storage TTL bounds (ledgers, ~5s each): bump at ~23 days, extend to ~30.
@@ -87,6 +83,50 @@ pub struct AttestationRecord {
     pub evidence_hash: BytesN<32>,
     pub attested_at: u64,
     pub oracle: Address,
+}
+
+/// Event emitted when a milestone is attested
+#[contractevent]
+pub struct Attested {
+    pub program_id: u64,
+    pub milestone_id: u32,
+    pub evidence_hash: BytesN<32>,
+}
+
+/// Event emitted when a milestone's funds are released
+#[contractevent]
+pub struct Released {
+    pub program_id: u64,
+    pub milestone_id: u32,
+    pub amount: i128,
+}
+
+/// Event emitted when a new program is created
+#[contractevent]
+pub struct ProgramCreated {
+    pub program_id: u64,
+    pub funder: Address,
+}
+
+/// Event emitted when a program is funded
+#[contractevent]
+pub struct Funded {
+    pub program_id: u64,
+    pub amount: i128,
+}
+
+/// Event emitted when unspent funds are refunded
+#[contractevent]
+pub struct Refunded {
+    pub program_id: u64,
+    pub amount: i128,
+}
+
+/// Event emitted when expired funds are reclaimed
+#[contractevent]
+pub struct Reclaimed {
+    pub program_id: u64,
+    pub amount: i128,
 }
 
 #[contract]
@@ -184,8 +224,11 @@ impl EscrowContract {
         };
         save_program(&env, &program);
 
-        env.events()
-            .publish((symbol_short!("prog_new"),), (counter, funder));
+        ProgramCreated {
+            program_id: counter,
+            funder,
+        }
+        .publish(&env);
         counter
     }
 
@@ -217,8 +260,7 @@ impl EscrowContract {
         let here = env.current_contract_address();
         token::TokenClient::new(&env, &token).transfer(&program.funder, &here, &amount);
 
-        env.events()
-            .publish((symbol_short!("funded"),), (program_id, amount));
+        Funded { program_id, amount }.publish(&env);
     }
 
     /// Attest a milestone with an evidence hash. Requires oracle auth.
@@ -254,10 +296,12 @@ impl EscrowContract {
         env.storage().persistent().set(&key, &record);
         bump_persistent_ttl(&env, &key);
 
-        env.events().publish(
-            (symbol_short!("attested"),),
-            (program_id, milestone_id, evidence_hash),
-        );
+        Attested {
+            program_id,
+            milestone_id,
+            evidence_hash,
+        }
+        .publish(&env);
     }
 
     /// Release a milestone's funds to the VoucherRegistry. Requires admin auth
@@ -320,10 +364,12 @@ impl EscrowContract {
         let here = env.current_contract_address();
         token::TokenClient::new(&env, &token).transfer(&here, &registry, &amount);
 
-        env.events().publish(
-            (symbol_short!("released"),),
-            (program_id, milestone_id, amount),
-        );
+        Released {
+            program_id,
+            milestone_id,
+            amount,
+        }
+        .publish(&env);
     }
 
     /// Refund unspent funds (funded - released) to the funder. Admin-only,
@@ -356,8 +402,11 @@ impl EscrowContract {
         let here = env.current_contract_address();
         token::TokenClient::new(&env, &token).transfer(&here, &program.funder, &unspent);
 
-        env.events()
-            .publish((symbol_short!("refunded"),), (program_id, unspent));
+        Refunded {
+            program_id,
+            amount: unspent,
+        }
+        .publish(&env);
     }
 
     /// Accept funds returned by the VoucherRegistry when a voucher expires.
@@ -396,8 +445,7 @@ impl EscrowContract {
             save_program(&env, &program);
         }
 
-        env.events()
-            .publish((symbol_short!("reclaimed"),), (program_id, amount));
+        Reclaimed { program_id, amount }.publish(&env);
     }
 
     /// Get a program's details.
