@@ -1,4 +1,4 @@
-.PHONY: help lint test build clean check-boundaries contracts services clients install
+.PHONY: help lint fmt test build clean check-boundaries contracts services clients install
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -22,6 +22,12 @@ lint: ## Run linting across all modules
 	@cd contracts && cargo clippy --all -- -D warnings || echo "Contracts not ready for clippy"
 	@cd services && go fmt ./... || echo "Services not ready for fmt"
 	@cd services && golangci-lint run || echo "Services not ready for golangci-lint (skipping)"
+
+fmt: ## Auto-format all modules in place
+	@echo "Formatting code..."
+	@npm run format --workspaces --if-present || true
+	@cd contracts && cargo fmt --all || echo "Contracts not ready for fmt"
+	@cd services && go fmt ./... || echo "Services not ready for fmt"
 
 test: ## Run tests across all modules
 	@echo "Running tests..."
