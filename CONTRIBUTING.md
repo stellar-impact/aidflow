@@ -73,16 +73,18 @@ All tests should pass. Running them needs only the Rust toolchain; to build the 
 ## Development Workflow
 
 1. **Sync with upstream:**
+
    ```bash
    git checkout main
    git pull upstream main
    ```
 
 2. **Create a feature branch:**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
-   
+
    Branch naming conventions:
    - `feature/` — new features
    - `fix/` — bug fixes
@@ -92,6 +94,7 @@ All tests should pass. Running them needs only the Rust toolchain; to build the 
 3. **Make your changes** following the coding standards below
 
 4. **Run tests and linting:**
+
    ```bash
    make test
    make lint
@@ -101,6 +104,7 @@ All tests should pass. Running them needs only the Rust toolchain; to build the 
 5. **Commit your changes** (see [Commit Message Guidelines](#commit-message-guidelines))
 
 6. **Push to your fork:**
+
    ```bash
    git push origin feature/your-feature-name
    ```
@@ -117,13 +121,13 @@ Many contributors use AI agents (like Kiro, Cursor, GitHub Copilot, or custom Cl
 
 The Stellar/Soroban toolchain had **breaking changes in late 2025 / early 2026**. An AI agent using stale training knowledge will generate broken code. Always verify the agent uses these exact versions:
 
-| Component | Correct Version | Common Mistake |
-|-----------|----------------|----------------|
-| **CLI** | `stellar-cli` 27.x | `soroban-cli` (old name) |
-| **Build Command** | `stellar contract build` | `soroban contract build` |
-| **Soroban SDK** | `soroban-sdk` 26.1+ | Using 25.x or older |
-| **Rust Target** | `wasm32v1-none` (automatic via stellar-cli) | `cargo build --target wasm32-unknown-unknown` |
-| **Go SDK** | `github.com/stellar/go-stellar-sdk` | `github.com/stellar/go` (DEPRECATED) |
+| Component         | Correct Version                             | Common Mistake                                |
+| ----------------- | ------------------------------------------- | --------------------------------------------- |
+| **CLI**           | `stellar-cli` 27.x                          | `soroban-cli` (old name)                      |
+| **Build Command** | `stellar contract build`                    | `soroban contract build`                      |
+| **Soroban SDK**   | `soroban-sdk` 26.1+                         | Using 25.x or older                           |
+| **Rust Target**   | `wasm32v1-none` (automatic via stellar-cli) | `cargo build --target wasm32-unknown-unknown` |
+| **Go SDK**        | `github.com/stellar/go-stellar-sdk`         | `github.com/stellar/go` (DEPRECATED)          |
 
 ### 🚨 Common AI Agent Mistakes
 
@@ -152,6 +156,7 @@ Watch for these in generated code:
 Example verification commands by area:
 
 **Contracts:**
+
 ```bash
 cd contracts
 stellar contract build --package aidflow-escrow
@@ -160,6 +165,7 @@ cargo clippy --package aidflow-escrow -- -D warnings
 ```
 
 **Services:**
+
 ```bash
 cd services
 go build ./cmd/indexer
@@ -167,6 +173,7 @@ go test ./...
 ```
 
 **Clients:**
+
 ```bash
 cd clients/donor-dashboard
 npm run build
@@ -174,6 +181,7 @@ npm test
 ```
 
 **Boundary Check:**
+
 ```bash
 ./scripts/check-boundaries.sh
 ```
@@ -192,6 +200,7 @@ When using an AI agent to resolve an issue:
 ### 🛑 CI Failures
 
 If your PR fails CI:
+
 - Review the CI logs carefully
 - Re-run verification commands locally
 - Check that you're using pinned versions
@@ -210,6 +219,17 @@ PRs will not be merged until CI passes. Branch protection blocks merge on failin
 - Add rustdoc comments for public APIs
 - Mark stability with `#[doc = "@stable"]` or `#[doc = "@beta"]`
 - Use `stellar contract build`, never `cargo build`
+- All source files must include the Apache-2.0 license header (see below)
+
+**License Header:**
+
+Every Rust source file in `contracts/**/src/*.rs` must start with this SPDX header:
+
+```rust
+// SPDX-License-Identifier: Apache-2.0
+```
+
+This identifies the file as licensed under Apache License 2.0, ensuring clear provenance for post-audit extraction.
 
 ### Go (Services)
 
