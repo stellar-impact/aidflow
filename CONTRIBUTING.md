@@ -292,7 +292,7 @@ This identifies the file as licensed under Apache License 2.0, ensuring clear pr
    - clients-ci: lint, test, build
    - boundaries-check: dependency direction
 
-3. **Request review** from maintainers
+3. **Reviews are requested automatically** based on the files you changed (see `.github/CODEOWNERS`). Changes under the escrow, voucher registry, and merchant registry contracts get extra scrutiny.
 
 4. **Address feedback promptly**
    - Make requested changes
