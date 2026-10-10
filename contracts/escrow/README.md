@@ -74,7 +74,7 @@ The Escrow contract implements milestone-gated program funding with a two-key tr
 
 ## Testnet Deployment
 
-Contract ID: [`CBF5SA4EAHZOYSMARBFBFOH7KJKH237LKHPHIOSVDHQ7HYL5KG3EWLVP`](https://stellar.expert/explorer/testnet/contract/CBF5SA4EAHZOYSMARBFBFOH7KJKH237LKHPHIOSVDHQ7HYL5KG3EWLVP)
+See the [Testnet Deployment](../../README.md#testnet-deployment) table in the root README for the current contract ID.
 
 ## References
 

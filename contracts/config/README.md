@@ -33,7 +33,7 @@ All data is stored in **instance storage** with a 30-day TTL:
 - `Oracle` — The oracle address
 - `Paused` — Boolean pause flag
 
-TTL is bumped on every access (threshold: ~23 days, extend to: ~30 days).
+TTL is bumped on every state change (`init`, `set_admin`, `set_oracle`, `pause`, `unpause`); the read-only getters do not bump it (threshold: ~23 days, extend to: ~30 days).
 
 ## Events
 
@@ -54,7 +54,7 @@ This creates a single source of truth for authorization and emergency shutdown.
 
 ## Testnet Deployment
 
-Contract ID: [`CASHFZM3IVJD4626QXM6XKYK64YV44D3EGAC4GIYGSSV3ULAXXXHANLN`](https://stellar.expert/explorer/testnet/contract/CASHFZM3IVJD4626QXM6XKYK64YV44D3EGAC4GIYGSSV3ULAXXXHANLN)
+See the [Testnet Deployment](../../README.md#testnet-deployment) table in the root README for the current contract ID.
 
 ## References
 

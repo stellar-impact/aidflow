@@ -68,7 +68,7 @@ Maximum 40 recipients per `issue_batch()` call. This leaves headroom within Soro
 
 ## Testnet Deployment
 
-Contract ID: [`CD5X5WGNKNYCRTUWOKSQTC2PANSJRRKBPO5JDWRUGBNC4GKLNJXMQR7G`](https://stellar.expert/explorer/testnet/contract/CD5X5WGNKNYCRTUWOKSQTC2PANSJRRKBPO5JDWRUGBNC4GKLNJXMQR7G)
+See the [Testnet Deployment](../../README.md#testnet-deployment) table in the root README for the current contract ID.
 
 ## References
 

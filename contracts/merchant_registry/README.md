@@ -65,7 +65,7 @@ Defined in `aidflow-contract-types`:
 
 ## Testnet Deployment
 
-Contract ID: [`CCQPQFR762BJ5GLMCR7P4BEM4PEHPD5UVRSGSJBWQ5PM6GFXK33L5OPP`](https://stellar.expert/explorer/testnet/contract/CCQPQFR762BJ5GLMCR7P4BEM4PEHPD5UVRSGSJBWQ5PM6GFXK33L5OPP)
+See the [Testnet Deployment](../../README.md#testnet-deployment) table in the root README for the current contract ID.
 
 ## References
 

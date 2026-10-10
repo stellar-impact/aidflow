@@ -89,9 +89,9 @@ All contracts import types from this crate:
 use aidflow_contract_types::{Milestone, ProgramStatus, Voucher, VoucherStatus, Merchant};
 ```
 
-## Stability Guarantees
+## Stability
 
-All types are marked `@stable` and will not change their wire format without a major version bump. This ensures that contracts built against different versions of the types crate remain compatible on-chain.
+These types are marked `@stable` as a design intent: a change to their encoding is treated as a breaking change and called out in review. The crate is pre-1.0 and not yet published, so this is not a compatibility guarantee yet.
 
 ## Publishing
 
