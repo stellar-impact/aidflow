@@ -272,7 +272,7 @@ PRs will not be merged until CI passes. Branch protection blocks merge on failin
    - clients-ci: lint, test, build
    - boundaries-check: dependency direction
 
-3. **Request review** from maintainers
+3. **Reviews are requested automatically** based on the files you changed (see `.github/CODEOWNERS`). Changes under the escrow, voucher registry, and merchant registry contracts get extra scrutiny.
 
 4. **Address feedback promptly**
    - Make requested changes

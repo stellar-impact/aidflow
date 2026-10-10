@@ -1,0 +1,22 @@
+# CODEOWNERS
+#
+# This file defines who is responsible for reviewing code in different parts
+# of the AidFlow repository. Reviews are automatically requested when PRs touch
+# files matching these patterns.
+#
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for all files
+* @dev-susa
+
+# Fund-custodying contracts require extra scrutiny
+/contracts/escrow/ @dev-susa
+/contracts/voucher_registry/ @dev-susa
+/contracts/merchant_registry/ @dev-susa
+
+# Major areas
+/services/ @dev-susa
+/clients/ @dev-susa
+/infra/ @dev-susa
+/docs/ @dev-susa
+/.github/ @dev-susa
