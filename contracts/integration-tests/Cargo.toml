@@ -9,7 +9,9 @@ description = "Cross-contract integration tests for AidFlow"
 [dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }
 aidflow-contract-types = { path = "../types" }
-# Import the real contracts (this crate exists only for testing)
+# Direct contract dependencies for integration tests.
+# This requires rlib in config/escrow Cargo.toml which increases their WASM size,
+# but allows type-safe cross-contract testing.
 aidflow-config = { path = "../config", features = ["testutils"] }
 aidflow-escrow = { path = "../escrow", features = ["testutils"] }
 

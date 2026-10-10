@@ -64,15 +64,15 @@ impl TestSetup {
         }
     }
 
-    fn config(&self) -> ConfigContractClient {
+    fn config(&self) -> ConfigContractClient<'_> {
         ConfigContractClient::new(&self.env, &self.config_id)
     }
 
-    fn escrow(&self) -> EscrowContractClient {
+    fn escrow(&self) -> EscrowContractClient<'_> {
         EscrowContractClient::new(&self.env, &self.escrow_id)
     }
 
-    fn token(&self) -> token::TokenClient {
+    fn token(&self) -> token::TokenClient<'_> {
         token::TokenClient::new(&self.env, &self.token)
     }
 
@@ -206,7 +206,7 @@ fn admin_oracle_rotation_honored_by_escrow() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "Error(Auth, InvalidAction)")]
 fn old_oracle_rejected_after_rotation() {
     let s = TestSetup::new();
     let e = s.escrow();
@@ -242,7 +242,7 @@ fn old_oracle_rejected_after_rotation() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "Error(Auth, InvalidAction)")]
 fn old_admin_rejected_after_rotation() {
     let s = TestSetup::new();
     let e = s.escrow();
@@ -250,7 +250,7 @@ fn old_admin_rejected_after_rotation() {
 
     let pid = e.create_program(&s.funder, &s.token, &s.two_milestones());
     e.fund(&pid, &1000);
-    
+
     // Attest with current oracle
     e.attest_milestone(&pid, &1, &s.evidence_hash());
 
@@ -361,7 +361,7 @@ fn pause_blocks_release() {
     e.fund(&pid, &1000);
     e.attest_milestone(&pid, &1, &s.evidence_hash());
     c.pause();
-    
+
     s.env.mock_auths(&[MockAuth {
         address: &s.admin,
         invoke: &MockAuthInvoke {
@@ -433,9 +433,9 @@ fn pause_blocks_refund() {
     e.fund(&pid, &1000);
     e.attest_milestone(&pid, &1, &s.evidence_hash());
     e.release(&pid, &1);
-    
+
     c.pause();
-    
+
     s.env.mock_auths(&[MockAuth {
         address: &s.admin,
         invoke: &MockAuthInvoke {
@@ -467,7 +467,7 @@ fn pause_blocks_reclaim() {
     e.fund(&pid, &1000);
     e.attest_milestone(&pid, &1, &s.evidence_hash());
     e.release(&pid, &1);
-    
+
     c.pause();
 
     s.env.mock_auths(&[MockAuth {
