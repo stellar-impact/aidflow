@@ -162,6 +162,7 @@ cd contracts
 stellar contract build --package aidflow-escrow
 cargo test --package aidflow-escrow
 cargo clippy --package aidflow-escrow -- -D warnings
+cargo audit
 ```
 
 **Services:**
@@ -216,6 +217,7 @@ PRs will not be merged until CI passes. Branch protection blocks merge on failin
 
 - Follow official Rust style: `cargo fmt`
 - Lint with Clippy: `cargo clippy -- -D warnings`
+- Security audit: `cargo audit` must pass (see `contracts/.cargo/audit.toml` for allowlist)
 - Add rustdoc comments for public APIs
 - Mark stability with `#[doc = "@stable"]` or `#[doc = "@beta"]`
 - Use `stellar contract build`, never `cargo build`
@@ -287,7 +289,7 @@ This identifies the file as licensed under Apache License 2.0, ensuring clear pr
    - Describe your testing approach
 
 2. **Ensure CI passes:**
-   - contracts-ci: fmt, clippy, test, build
+   - contracts-ci: fmt, clippy, test, build, audit
    - services-ci: fmt, lint, test, build
    - clients-ci: lint, test, build
    - boundaries-check: dependency direction

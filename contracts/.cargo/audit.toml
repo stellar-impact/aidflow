@@ -1,0 +1,58 @@
+# cargo-audit configuration for AidFlow contracts
+# 
+# All listed advisories are transitive dependencies from soroban-sdk 26.1.1,
+# which is the current stable version required for Stellar smart contracts.
+# These will be addressed when Stellar releases updated SDK versions that
+# resolve these dependencies.
+
+[advisories]
+# All advisories are transitive dependencies from soroban-sdk 26.1.1.
+# These will be resolved when Stellar releases SDK updates with patched dependencies.
+
+ignore = [
+    # RUSTSEC-2026-0387: crypto-bigint timing variability in constant-time operations
+    # Justification: Transitive dependency via elliptic-curve in soroban-env-host.
+    #                The timing issues affect cryptographic operations, but all contract
+    #                cryptography is handled by the Soroban host environment, not by
+    #                contract code directly. The contract runtime uses host functions
+    #                for all sensitive operations.
+    # Date accepted: 2026-11-23
+    # Review by: 2027-01-01 or when soroban-sdk updates to crypto-bigint >=0.7.6
+    "RUSTSEC-2026-0387",
+
+    # RUSTSEC-2026-0543: chrono is unmaintained
+    # Justification: Transitive dependency via serde_with in stellar-xdr.
+    #                Used only for XDR serialization in the SDK, not in contract logic.
+    #                Waiting for Stellar SDK to migrate to maintained time library.
+    # Date accepted: 2026-11-23
+    # Review by: 2027-02-01
+    "RUSTSEC-2026-0543",
+
+    # RUSTSEC-2024-0436: paste macro crate no longer maintained
+    # Justification: Transitive dependency via wasmi_core and ark-ff in soroban host.
+    #                This is a procedural macro used at compile time only, not runtime.
+    #                No security impact on deployed contracts. Stellar team aware and
+    #                tracking replacement in wasmi fork.
+    # Date accepted: 2026-11-23
+    # Review by: 2027-02-01
+    "RUSTSEC-2024-0436",
+
+    # heapless 0.8.0 - Multiple soundness issues (RUSTSEC-2026-0574 through RUSTSEC-2026-0582)
+    # Justification: Transitive dependency via stellar-strkey in soroban-sdk.
+    #                heapless is used for fixed-size collections in no_std environments.
+    #                All identified issues affect specific data structures (Deque, IndexMap,
+    #                SortedLinkedList, Spsc, treiber stack) which are not used in the
+    #                address encoding/decoding path where stellar-strkey uses heapless.
+    #                Stellar team is tracking upstream fixes.
+    # Date accepted: 2026-11-23
+    # Review by: 2027-01-01 or when soroban-sdk updates to heapless >=0.8.1
+    "RUSTSEC-2026-0574",  # FindMutView::pop use after free
+    "RUSTSEC-2026-0575",  # Spsc::peek wrong memory ordering
+    "RUSTSEC-2026-0576",  # IndexMap::truncate inconsistent state
+    "RUSTSEC-2026-0577",  # Panicking Drop could lead to UB
+    "RUSTSEC-2026-0578",  # SortedLinkedList::zeroize inconsistent state
+    "RUSTSEC-2026-0579",  # Deque TryFrom implementation wrong when full
+    "RUSTSEC-2026-0580",  # treiber stack race condition
+    "RUSTSEC-2026-0581",  # Deque::make_contiguous broken invariants
+    "RUSTSEC-2026-0582",  # IndexMap::insert on u16::MAX elements broken invariant
+]
